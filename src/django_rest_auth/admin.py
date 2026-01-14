@@ -101,7 +101,7 @@ class EntidadeModuloAdmin(admin.ModelAdmin):
     list_display = ['id', 'entidade', 'modulo', 'estado','created_at', 'updated_at', 'is_deleted']
     list_display_links = ('id', 'entidade', 'modulo',)
     search_fields = ['entidade', 'modulo',]
-admin.site.register(EntidadeModulo, EntidadeModulopAdmin)
+admin.site.register(EntidadeModulo, EntidadeModuloAdmin)
 
 class TipoEntidadeModuloAdmin(admin.ModelAdmin):
     list_display = ['id', 'tipo_entidade', 'modulo', 'estado', 'created_at', 'updated_at', 'is_deleted']
