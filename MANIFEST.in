@@ -1,0 +1,2 @@
+recursive-include src/django_rest_auth/templates *
+recursive-include src/django_rest_auth/static *

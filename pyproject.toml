@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=61", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mytech_rest_auth"
+version = "1.1.5"
+description = "App de autenticação e gestão de entidades para Django REST Framework"
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.9"
+authors = [
+  { name = "Dias Metano Salvador Chavana", email = "metanochava@gmail.com" }
+]
+
+dependencies = [
+  
+]
+
+[project.urls]
+Homepage = "https://github.com/metanochava/django_rest_auth"
+Repository = "https://github.com/metanochava/django_rest_auth"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+
