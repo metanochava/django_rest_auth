@@ -8,8 +8,9 @@ from .import viewsApi, views
 from rest_framework import routers
 
 router = routers.DefaultRouter()
+router.register(r'ficheiros', viewsApi.FicheiroAPIView)
 router.register(r'idiomas', viewsApi.IdiomaAPIView)
-router.register(r'taducaos', viewsApi.IdiomaAPIView)
+router.register(r'traducaos', viewsApi.TraducaoAPIView)
 router.register(r'inputs', viewsApi.InputAPIView)
 router.register(r'strings', viewsApi.StringAPIView)
 router.register(r'users', viewsApi.UsuarioAPIView)
@@ -20,7 +21,7 @@ router.register(r'sucursals', viewsApi.SucursalAPIView)
 router.register(r'grupos', viewsApi.GrupoAPIView)
 router.register(r'permissions', viewsApi.PermissionAPIView)
 router.register(r'modelos', viewsApi.ModeloAPIView)
-router.register(r'ficheiros', viewsApi.FicheiroAPIView)
+
 
 
 

@@ -14,7 +14,7 @@ from .decorators import hasPermission, isPermited
 class  TraducaoAPIView(viewsets.ModelViewSet):
     # permission_classes = (permissions.IsAuthenticated)
     # paginator = None
-    search_fields = ['idioma__nome','chave']
+    search_fields = ['lang','chave']
     filter_backends = (filters.SearchFilter,)
 
     serializer_class = TraducaoSerializer
@@ -29,18 +29,13 @@ class  TraducaoAPIView(viewsets.ModelViewSet):
         methods=['GET'],
     )
     def getTraducao(self, request, id):
-        traducaos = Traducao.objects.filter(idioma=id)
-        idioma = Idioma.objects.get(id=id)
+        traducaos = Traducao.objects.filter(lang='valor por colocar')
+        idioma = Idioma.objects.get(code= 'valor por colocar')
 
         traducao_ = []
         for traducao in traducaos:
             traducao_.append({traducao.chave: traducao.traducao})
 
-        if idioma.code:
-            pass
-        else:
-            idioma.code = "PT-PT"
-        # iterate over each line as a ordered dictionary and print only few column by column name
         try:
             with open(str(os.getcwd()) + '/core/lang/{}.csv'.format(idioma.code), 'r') as read_obj:
                 csv_dict_reader = DictReader(read_obj)
