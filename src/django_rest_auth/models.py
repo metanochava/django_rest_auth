@@ -1,6 +1,4 @@
 import uuid
-
-
 # Create your models here.
 from django.contrib.auth.models import (AbstractBaseUser, BaseUserManager, PermissionsMixin)
 from django.contrib.auth.models import Group, Permission
@@ -27,7 +25,7 @@ class Idioma(models.Model):
 
     class Meta:
         permissions = (
-            ("list_idioma", "Can list idioma"),
+            
         )
 
     def __str__(self):
@@ -35,7 +33,6 @@ class Idioma(models.Model):
 
 class Traducao(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    # idioma = models.TextField(Idioma=True,blank=True)
     idioma = models.ForeignKey(Idioma, on_delete=models.CASCADE)
     chave = models.TextField(null=True, blank=True)
     traducao = models.TextField(null=True,blank=True)
@@ -44,7 +41,7 @@ class Traducao(models.Model):
 
     class Meta:
         permissions = (
-            ("list_traducao", "Can List Traducao"),
+            
         )
 
     def __str__(self):
@@ -55,7 +52,7 @@ class Input(models.Model):
     nome = models.CharField(max_length=100, null=True)
     class Meta:
         permissions = (
-            ("list_input", "Can list input"),
+            
         ) 
 
     def __str__(self):
@@ -67,7 +64,7 @@ class String(models.Model):
     texto = models.TextField(null=True, blank=True)
     class Meta:
         permissions = (
-            ("list_string", "Can list string"),
+            
         ) 
 
     def __str__(self):
@@ -80,7 +77,7 @@ class InputString(models.Model):
 
     class Meta:
         permissions = (
-            ("list_input_string", "Can List Input  String"),
+            
         ) 
 
     def __str__(self):
@@ -148,7 +145,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         verbose_name = "User"
         verbose_name_plural = "Users"
         permissions = (
-            ("list_user", "Can list user"),
+            
         )
 
     def __str__(self):
@@ -179,7 +176,7 @@ class UserLogin(models.Model):
 
     class Meta:
         permissions = (
-            ("list_userlogin", "Can list user login"),
+            
         )
        
     def __str__(self):
@@ -218,7 +215,7 @@ class TipoEntidade(models.Model):
 
     class Meta:
         permissions = (
-            ("list_tipoentidade", "Can list tipo entidade"),
+
         )
     def __str__(self):
         return self.nome
@@ -240,7 +237,7 @@ class Modulo(models.Model):
 
     class Meta:
         permissions = (
-            ("list_modulo", "Can list modulo"),
+            
         )
 
     def __str__(self):
@@ -265,7 +262,7 @@ class FrontEnd(models.Model):
 
     class Meta:
         permissions = (
-            ("list_front_end", "Can list front end"),
+            
         )
 
     def __str__(self):
@@ -310,7 +307,7 @@ class Entidade(models.Model):
 
     class Meta:
         permissions = (
-            ("list_entidade", "Can list entidade"),
+            
         )
 
     def __str__(self):
@@ -341,7 +338,7 @@ class Sucursal(models.Model):
 
     class Meta:
         permissions = (
-            ("list_sucursal", "Can list sucursal"),
+            
         )
 
     def __str__(self):
@@ -361,7 +358,7 @@ class EntidadeGroup(models.Model):
 
     class Meta:
         permissions = (
-            ("list_entidadegroup", "Can list entidade group"),
+            
         )
     def __str__(self):
         return str(self.entidade.nome)+ "  |  "+str(self.group.name)
@@ -379,7 +376,7 @@ class EntidadeUser(models.Model):
 
     class Meta:
         permissions = (
-            ("list_entidadeuser", "Can list entidade user"),
+        
         )
 
     def __str__(self):
@@ -398,7 +395,7 @@ class SucursalGroup(models.Model):
 
     class Meta:
         permissions = (
-            ("list_sucursalgroup", "Can list sucursal group"),
+            
         )
     def __str__(self):
         return str(self.sucursal.nome)+" | "+str(self.group.name)+" "
@@ -415,7 +412,7 @@ class SucursalUser(models.Model):
 
     class Meta:
         permissions = (
-            ("list_sucursaluser", "Can list sucursal user"),
+            
         )
 
     def __str__(self):
@@ -435,7 +432,7 @@ class SucursalUserGroup(models.Model):
 
     class Meta:
         permissions = (
-            ("list_sucursalusergroup", "Can list sucursal user group"),
+            
         )
 
     def __str__(self):
@@ -459,7 +456,7 @@ class EntidadeModulo(models.Model):
 
     class Meta:
         permissions = (
-            ("list_entidademodulo", "Can list entidade modulo"),
+            
         )
 
     def __str__(self):
@@ -483,7 +480,7 @@ class TipoEntidadeModulo(models.Model):
 
     class Meta:
         permissions = (
-            ("list_tipoentidademodulo", "Can list tipo entidade modulo"),
+            
         )
 
     def __str__(self):
@@ -521,7 +518,7 @@ class Ficheiro(models.Model):
 
     class Meta:
         permissions = (
-            ("list_ficheiro", "Can list ficheiros"),
+            
         )
 
     def __str__(self):

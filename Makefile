@@ -6,6 +6,12 @@ up:
 	git push origin main; \
 	python -m build; \
 	twine upload dist/*; 
+upgit:
+	git add .; \
+	VERSION=$$(python -c "import tomli; print(tomli.load(open('pyproject.toml','rb'))['project']['version'])"); \
+	read -p "Mensagem do release: $$VERSION " m; \
+	git commit -m "release: v$$VERSION - $$m"; \
+	git push origin main;  
 upv:
 	git add .; \
 	VERSION=$$(python -c "import tomli; print(tomli.load(open('pyproject.toml','rb'))['project']['version'])"); \

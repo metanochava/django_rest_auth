@@ -15,13 +15,12 @@ import importlib
 
 
 class  TraducaoAPIView(viewsets.ModelViewSet):
-    search_fields = ['idioma__nome','chave']
     filter_backends = (filters.SearchFilter,)
     serializer_class = IdiomaSerializer
     queryset = Idioma.objects.all()
 
     def get_queryset(self):
-        return self.queryset.filter().order_by('chave')
+        return self.queryset.filter()
 
 
 CACHE_TIMEOUT = 60 * 60  # 1 hora
