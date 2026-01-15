@@ -51,3 +51,6 @@ copilot-messages.log
 __pycache__
 dist
 files
+dev
+manage.py
+db.sqlite3

@@ -46,3 +46,11 @@ copilot-messages.log
 # System files
 .DS_Store
 .project/attachments/files/**
+
+.project
+__pycache__
+dist
+files
+dev
+manage.py
+db.sqlite3

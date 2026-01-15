@@ -61,7 +61,7 @@ class UserLoginAdmin(admin.ModelAdmin):
 admin.site.register(UserLogin, UserLoginAdmin)
 
 class EntidadeAdmin(admin.ModelAdmin):
-    list_display = ['id', 'nome', 'logo', 'ipu', 'admin_list', 'display_logo', 'display_qr', 'display_bar',  'tipo_entidade', 'entidade_bancaria', 'disc_space', 'disc_used_space', 'disc_free_space', 'rodape', 'estado', 'created_at', 'updated_at', 'is_deleted']
+    list_display = ['id', 'nome', 'logo', 'admin_list', 'display_logo', 'display_qr', 'display_bar',  'tipo_entidade',  'disc_space', 'disc_used_space', 'disc_free_space', 'rodape', 'estado', 'created_at', 'updated_at', 'is_deleted']
     list_display_links = ('id', 'nome',)
     search_fields = ['nome']
 

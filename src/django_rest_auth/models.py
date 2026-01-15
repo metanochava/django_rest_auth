@@ -120,7 +120,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_verified_mobile = models.BooleanField(blank=False, default=False)
     counter = models.IntegerField(default=0, blank=False)   # For HOTP Verification
     email = models.EmailField(max_length=255, null=True, unique=True, blank=True, default=None)
-    language = models.CharField(max_length=25,default="PT-PT")
+    language = models.ForeignKey(Idioma, on_delete=models.CASCADE)
     is_verified = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
@@ -191,22 +191,15 @@ class TipoEntidade(models.Model):
     icon = models.FileField(upload_to=icon_path, default='logo.png', blank=True)
     license = models.TextField(default='license')
     label = models.CharField(max_length=100, null=True)
-    header= models.TextField(default='bg-grey-2 text-grey-9')
-    menuEsquerdo= models.TextField(default='bg-grey-2 text-grey-9')
-    footer = models.TextField(default='bg-grey-2 text-grey-9')
     ordem = models.IntegerField(default=2)
     crair_entidade = models.BooleanField(max_length=100, null=True, default=True)
-
     STATUS = (
         ('Activo', 'Activo'),
         ('Desativado', 'Desativado')
     )
-
     estado = models.CharField(max_length=100, null=True, choices=STATUS)
     groups = models.ManyToManyField(Group, blank=True)
     modelos = models.ManyToManyField(ContentType, blank=True)
-    language = models.CharField(max_length=25, default="PT")
-    link= models.CharField(max_length=500, default="link")
     created_at = models.DateField(null=True, auto_now_add=True)
     updated_at = models.DateField(null=True, auto_now=True)
     created_at_time = models.DateField(null=True, auto_now_add=True)
@@ -278,11 +271,9 @@ class Entidade(models.Model):
     display_bar = models.BooleanField(default=True, null=True, blank=True)
     display_qr = models.BooleanField(default=True, null=True, blank=True)
     tipo_entidade = models.ForeignKey(TipoEntidade, on_delete=models.CASCADE)
-    entidade_bancaria = models.CharField(max_length=100, null=True, blank=True)
     groups = models.ManyToManyField(Group, blank=True)
     modelos = models.ManyToManyField(ContentType, blank=True)
     admins = models.ManyToManyField(User, blank=False)
-    ipu = models.CharField(max_length=500, null=True, blank=True)
     rodape = models.CharField(max_length=2000, null=True)
     disc_space = models.FloatField( default=1048576.0, null=True)
     disc_used_space = models.FloatField(default=0.0, null=True)

@@ -223,7 +223,7 @@ class EntidadeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Entidade
-        fields = ['id', 'nome', 'logo', 'ipu', 'groups', 'admins', 'modelos', 'display_logo', 'display_qr', 'display_bar',  'tipo_entidade', 'entidade_bancaria',  'disc_space', 'disc_used_space', 'disc_free_space', 'rodape', 'estado', 'created_at', 'updated_at', 'is_deleted']
+        fields = ['id', 'nome', 'logo', 'groups', 'admins', 'modelos', 'display_logo', 'display_qr', 'display_bar',  'tipo_entidade',  'disc_space', 'disc_used_space', 'disc_free_space', 'rodape', 'estado', 'created_at', 'updated_at', 'is_deleted']
 
 
 class EntidadeUserSerializer(serializers.ModelSerializer):
@@ -307,8 +307,7 @@ class TipoEntidadeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = TipoEntidade
-        fields = ['id', 'nome', 'estado', 'icon','label', 'groups',  'crair_entidade', 'link', 'header', 'menuEsquerdo', 'footer', 'created_at',
-                  'created_at_time', 'updated_at', 'updated_at_time', 'is_deleted']
+        fields = ['id', 'nome', 'estado', 'icon','label', 'groups',  'crair_entidade',  'created_at', 'created_at_time', 'updated_at', 'updated_at_time', 'is_deleted']
         read_only_fields = ['icon']
 
 class UserSerializer(serializers.ModelSerializer):
