@@ -54,3 +54,4 @@ files
 dev
 manage.py
 db.sqlite3
+mytech_rest_auth.egg*
