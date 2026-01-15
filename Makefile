@@ -5,7 +5,7 @@ up:
 	git commit -m "release: v$$VERSION - $$m"; \
 	git push origin main; \
 	python -m build; \
-	twine upload dist/*; \
+	twine upload dist/*; 
 upv:
 	git add .; \
 	VERSION=$$(python -c "import tomli; print(tomli.load(open('pyproject.toml','rb'))['project']['version'])"); \
@@ -15,4 +15,4 @@ upv:
 	git push origin main; \
 	git push origin v$$VERSION; \
 	python -m build; \
-	twine upload dist/*; \
+	twine upload dist/*; 

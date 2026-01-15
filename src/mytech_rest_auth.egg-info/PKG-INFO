@@ -1,6 +1,6 @@
 Metadata-Version: 2.4
 Name: mytech_rest_auth
-Version: 1.1.9
+Version: 1.1.10
 Summary: App de autenticação e gestão de entidades para Django REST Framework
 Author-email: Dias Metano Salvador Chavana <metanochava@gmail.com>
 License: MIT License

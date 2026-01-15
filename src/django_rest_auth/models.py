@@ -35,7 +35,8 @@ class Idioma(models.Model):
 
 class Traducao(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    idioma = models.TextField(Idioma=True,blank=True)
+    # idioma = models.TextField(Idioma=True,blank=True)
+    idioma = models.ForeignKey(Idioma, on_delete=models.CASCADE)
     chave = models.TextField(null=True, blank=True)
     traducao = models.TextField(null=True,blank=True)
     created_at = models.DateField(null=True, auto_now_add=True)
