@@ -1,6 +1,7 @@
 from rest_framework import viewsets
 from rest_framework import filters
 from .serializers import *
+from .models import *
 from rest_framework.decorators import action
 from django.db.models import F
 from rest_framework.response import Response
@@ -8,34 +9,77 @@ from rest_framework import status
 import importlib.util
 from django.apps import apps
 from .decorators import hasPermission, isPermited
+from django.core.cache import cache
+import importlib
 
 
 
 class  TraducaoAPIView(viewsets.ModelViewSet):
-    # permission_classes = (permissions.IsAuthenticated)
-    # paginator = None
-    search_fields = ['lang','chave']
+    search_fields = ['idioma__nome','chave']
     filter_backends = (filters.SearchFilter,)
-
-    serializer_class = TraducaoSerializer
-    queryset = Traducao.objects.all()
-    lookup_field = "id"
+    serializer_class = IdiomaSerializer
+    queryset = Idioma.objects.all()
 
     def get_queryset(self):
         return self.queryset.filter().order_by('chave')
+
+
+CACHE_TIMEOUT = 60 * 60  # 1 hora
+
+@action(detail=True, methods=['GET'])
+def traducoes(self, request, *args, **kwargs):
+    transformer = self.get_object()
+    lang_code = str(transformer.code).lower().replace('-', '')
+    cache_key = f"traducao:{lang_code}"
+
+    # 1️⃣ Tenta obter do cache
+    cached = cache.get(cache_key)
+    if cached is not None:
+        return Response(cached, status=status.HTTP_200_OK)
+
+    # 2️⃣ Caso não exista cache, constrói as traduções
+    traducoes = {}
+
+    # Base de dados
+    db_traducoes = Traducao.objects.filter(idioma_id=transformer.id)
+    for tra in db_traducoes:
+        traducoes[tra.chave] = tra.traducao
+
+    # Módulos lang
+    for app in apps.get_app_configs():
+        module_name = f"{app.name}.lang.{lang_code}"
+
+        try:
+            modulo = importlib.import_module(module_name)
+        except ModuleNotFoundError:
+            continue
+
+        if hasattr(modulo, "key_value"):
+            traducoes.update(modulo.key_value)
+
+    # 3️⃣ Guarda no cache
+    cache.set(cache_key, traducoes, CACHE_TIMEOUT)
+
+    return Response(traducoes, status=status.HTTP_200_OK)
+
 
     @action(
         detail=True,
         methods=['GET'],
     )
     def getTraducao(self, request, id):
-        traducaos = Traducao.objects.filter(lang='valor por colocar')
-        idioma = Idioma.objects.get(code= 'valor por colocar')
+        traducaos = Traducao.objects.filter(idioma=id)
+        idioma = Idioma.objects.get(id=id)
 
         traducao_ = []
         for traducao in traducaos:
             traducao_.append({traducao.chave: traducao.traducao})
 
+        if idioma.code:
+            pass
+        else:
+            idioma.code = "PT-PT"
+        # iterate over each line as a ordered dictionary and print only few column by column name
         try:
             with open(str(os.getcwd()) + '/core/lang/{}.csv'.format(idioma.code), 'r') as read_obj:
                 csv_dict_reader = DictReader(read_obj)
@@ -716,7 +760,7 @@ class TipoEntidadeAPIView(viewsets.ModelViewSet):
 
         return Response(apps_, status.HTTP_200_OK)
     
-    # @user_has_permission('view_entidade')
+
     @action(detail=True,methods=['GET'],)
     def menus(self, request, *args, **kwargs):
         transformer = self.get_object()
@@ -784,7 +828,19 @@ class TipoEntidadeAPIView(viewsets.ModelViewSet):
         modelo = {'id': modelo.id, 'model': modelo.model, 'alert_success': 'App <b>'+ modelo.model + ' </b> Removido com sucesso'}
         return Response(modelo, status.HTTP_201_CREATED)
 
+    @action(
+        detail=True,
+        methods=['GET'],
+    )
+    def modulos(self, request, *args, **kwargs):
+        transformer = self.get_object()
+        EntMods = TipoEntidadeModulo.objects.filter(tipo_entidade = transformer.id)        
+        modulos = [
+            {'id': TiEntMo.modelo.id, 'nome': TiEntMo.modelo.nome}
+            for TiEntMo in EntMods
+        ]
 
+        return Response(modulos, status=status.HTTP_200_OK)
 
 class  EntidadeAPIView(viewsets.ModelViewSet):
     search_fields = ['id','nome']
@@ -926,12 +982,14 @@ class  EntidadeAPIView(viewsets.ModelViewSet):
     )
     def modulos(self, request, *args, **kwargs):
         transformer = self.get_object()
-        entidade = Entidade.objects.get(id= transformer.id)        
-        modulos = set()
-        for modelo in entidade.modelos.all():
-           modulos.add( modelo.app_label )
+        EntMods = EntidadeModulo.objects.filter(entidade= transformer.id)        
+        modulos = [
+            {'id': EntMo.modelo.id, 'nome': EntMo.modelo.nome}
+            for EntMo in EntMods
+        ]
 
-        return Response(modulos, status.HTTP_200_OK)
+        return Response(modulos, status=status.HTTP_200_OK)
+
 
     
     @action(detail=True, methods=['POST'],)
@@ -1160,11 +1218,11 @@ class  EntidadeAPIView(viewsets.ModelViewSet):
             'barcode': blob_barcode, 
             'entidade': entidade.data,
             'logo':logo,
-            'titulo': Translate.st(lingua, 'QR'),
-            'nome': Translate.st(lingua, 'Entidade'),
-            'de': Translate.st(lingua, 'de'),
-            'morada': Translate.st(lingua, 'Morada'),
-            'pagina': Translate.st(lingua, 'Pagina')
+            'titulo': Translate.tdc(lingua, 'QR'),
+            'nome': Translate.tdc(lingua, 'Entidade'),
+            'de': Translate.tdc(lingua, 'de'),
+            'morada': Translate.tdc(lingua, 'Morada'),
+            'pagina': Translate.tdc(lingua, 'Pagina')
         }
         # Create a Django response object, and specify content_type as pdf
         response = HttpResponse(content_type='application/pdf')
@@ -1394,11 +1452,11 @@ class  SucursalAPIView(viewsets.ModelViewSet):
             'entidade': entidade.data,
             'sucursal': sucursal.data,
             'logo':logo,
-            'titulo': Translate.st(lingua, 'QR'),
-            'nome': Translate.st(lingua, 'Sucursal'),
-            'de': Translate.st(lingua, 'de'),
-            'morada': Translate.st(lingua, 'Morada'),
-            'pagina': Translate.st(lingua, 'Pagina')
+            'titulo': Translate.tdc(lingua, 'QR'),
+            'nome': Translate.tdc(lingua, 'Sucursal'),
+            'de': Translate.tdc(lingua, 'de'),
+            'morada': Translate.tdc(lingua, 'Morada'),
+            'pagina': Translate.tdc(lingua, 'Pagina')
         }
         # Create a Django response object, and specify content_type as pdf
         response = HttpResponse(content_type='application/pdf')

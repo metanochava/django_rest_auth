@@ -18,11 +18,11 @@ class CoreMidlleware:
         if not (template in settings.AUTH_URL):
             if str(request.headers.get('FEK')) != 'None' and str(request.headers.get('FEP')) != 'None':
                 if not FrontEnd.objects.filter(fek=str(request.headers.get('FEK')), fep=str(request.headers.get('FEP'))).first():
-                    txt = "code 10001 " + Translate.st(request.META['QUERY_STRING'], 'Nao autorizado Bad Credentials') + " " +  request.META['REMOTE_ADDR'] +" "+str(request.headers.get('FEK')) +" "+str(request.headers.get('FEP'))
+                    txt = "code 10001 " + Translate.tdc(request.META['QUERY_STRING'], 'Nao autorizado Bad Credentials') + " " +  request.META['REMOTE_ADDR'] +" "+str(request.headers.get('FEK')) +" "+str(request.headers.get('FEP'))
                     return HttpResponse(txt, status=status.HTTP_401_UNAUTHORIZED, content_type='application/json')
             else:
                 if request.META['REMOTE_ADDR'] not in settings.ALLOWED_HOSTS:
-                    txt = "code 10002 " + Translate.st(request.META['QUERY_STRING'], 'Nao autorizado No Credentials') + " " + request.META['REMOTE_ADDR']
+                    txt = "code 10002 " + Translate.tdc(request.META['QUERY_STRING'], 'Nao autorizado No Credentials') + " " + request.META['REMOTE_ADDR']
                     return HttpResponse(txt, status=status.HTTP_401_UNAUTHORIZED, content_type='application/json')
 
         response = self.get_response(request)
@@ -33,7 +33,7 @@ class CoreFileMidlleware:
         self.get_response = get_response
     def __call__(self, request):
 
-        txt = Translate.st(request.META['QUERY_STRING'], 'Nao autorizado')
+        txt = Translate.tdc(request.META['QUERY_STRING'], 'Nao autorizado')
         qs = request.META['QUERY_STRING']
         path = request.META['PATH_INFO'].split('/')[1]
         token = None

@@ -23,7 +23,7 @@ from django.db.models import Q
 class TraducaoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Traducao
-        fields = ['id', 'chave', 'traducao', 'lang']
+        fields = ['id', 'chave', 'traducao', 'idioma']
 
 
 def authenticate(value=None, password=None):

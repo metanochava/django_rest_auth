@@ -1,76 +1,105 @@
-import  os
-from csv import DictReader
 import re
+import importlib
+from django.apps import apps
+from django.core.cache import cache
+from ..models import Idioma, Traducao  # import apenas os modelos necessários
+
+CACHE_TIMEOUT = 60 * 60  # 1 hora
+
 
 class Translate:
-    @staticmethod
-    def st(lang, texto):
-
-        translations = Translate.getTranslations(Translate.getLang(lang))
-        returne = ''
-        # print(translations)
-        for traduce in translations:
-            key = str(list(traduce.keys())[0]).strip()
-            valor = str(list(traduce.values())[0]).strip()
-            if ( Translate.remocao(key) == Translate.remocao(texto)):
-                traducao = valor
-                returne= Translate.replaceTraducao( texto, traducao)
-
-        if returne == '':
-            returne = texto
-
-        return returne
 
     @staticmethod
-    def getTranslations(lang):
-        traducao_ = []
-        if lang:
-            pass
-        else:
-            lang = "PT-PT"
+    def tdc(request, texto):
+        """
+        Função equivalente à função JS 'traducao'.
+        Procura a tradução direta e aplica replace_traducao se necessário.
+        """
+
+        # 1️⃣ Obtém traduções
+        translations = Translate.getTranslations(request)
+        if not translations:
+            return texto
+
+        # 2️⃣ Normaliza a chave
+        chave = texto.lower().strip()
+
+        # 3️⃣ Busca tradução direta
+        traducao_direta = translations.get(chave)
+        if not traducao_direta:
+            return texto
+
+        # 4️⃣ Aplica placeholders se existirem
+        return Translate.replace_traducao(texto, traducao_direta)
+
+    @staticmethod
+    def getTranslations(request):
+        """
+        Obtém traduções do cache, banco de dados e módulos lang dos apps.
+        """
+        lang_id = request.headers.get('L')
+        if not lang_id:
+            return {}
+
         try:
-            with open(str(os.getcwd()) + '/core/lang/{}.csv'.format(lang), 'r') as read_obj:
-                csv_dict_reader = DictReader(read_obj)
-                for row in csv_dict_reader:
-                    traducao_.append({row['chave']: row['traducao']})
-        except Exception as e:
-            print(e)
-        return traducao_
+            idioma = Idioma.objects.get(id=lang_id)
+        except Idioma.DoesNotExist:
+            return {}
+
+        lang_code = idioma.code.lower().replace('-', '')
+        cache_key = f"traducao:{lang_code}"
+
+        # 1️⃣ Tenta obter do cache
+        cached = cache.get(cache_key)
+        if cached is not None:
+            return cached
+
+        traducoes = {}
+
+        # 2️⃣ Base de dados
+        db_traducoes = Traducao.objects.filter(idioma_id=idioma.id)
+        for tra in db_traducoes:
+            traducoes[tra.chave.lower().strip()] = tra.traducao  # normaliza a chave
+
+        # 3️⃣ Módulos lang dos apps
+        for app in apps.get_app_configs():
+            module_name = f"{app.name}.lang.{lang_code}"
+            try:
+                file_traducoes = importlib.import_module(module_name)
+            except ModuleNotFoundError:
+                continue
+
+            if hasattr(file_traducoes, "key_value") and isinstance(file_traducoes.key_value, dict):
+                # normaliza as chaves dos módulos também
+                traducoes.update({k.lower().strip(): v for k, v in file_traducoes.key_value.items()})
+
+        # 4️⃣ Salva no cache
+        cache.set(cache_key, traducoes, CACHE_TIMEOUT)
+
+        return traducoes
 
     @staticmethod
-    def remocao(texto):
-        newstr = str(texto).replace('/(\s*%-\s*[a-zA-Z-0-9\s*]+\s*-%\s*)/g', ' ')
-        return newstr
+    def captura(texto=''):
+        """
+        Captura placeholders do tipo '%- valor -%' no texto.
+        """
+        return re.findall(r'\s*%-\s*[\w\s-]+\s*-%\s*', texto)
 
     @staticmethod
-    def captura(texto):
-        newstr = texto # str(texto).('/(\s*%-\s*[a-zA-Z-0-9\s*]+\s*-%\s*)/g')
-        return newstr
+    def replace_traducao(texto='', texto_de_traducao=''):
+        """
+        Substitui placeholders no texto_de_traducao pelos valores capturados em texto.
+        """
+        valores = Translate.captura(texto)
+        if not valores:
+            return texto_de_traducao
 
-    @staticmethod
-    def replaceTraducao(texto, textDeTraducao):
-        array = Translate.captura(texto)
-        if array != None:
-            pass
-            # array.forEach(element = > {
-            # element = element.replace('%-', '')
-            # element = element.replace('-%', '')
-            # text = element.trim()
-            # co = re.compile('/(\s*%-\s*[a-zA-Z-0-9\s*]+\s*-%\s*)/g')
-            # textDeTraducao = textDeTraducao.replace(co, " "+text+" ")
-            # })
+        i = 0
 
-        return textDeTraducao
+        def replacer(_):
+            nonlocal i
+            v = valores[i] if i < len(valores) else None
+            i += 1
+            return (' ' + v.replace('%-', '').replace('-%', '').strip() + ' ') if v else ''
 
-    @staticmethod
-    def getLang(lang):
-        if str(lang).__contains__('='):
-            if str(lang).__contains__('&'):
-                lang = lang.split('&')
-                for l in lang:
-                    if l.split('=')[0] == 'lang':
-                        return l.split('=')[1]
-            else:
-                if lang.split('=')[0] == 'lang':
-                    return lang.split('=')[1]
-        return lang
+        return re.sub(r'\s*%-\s*[\w\s-]+\s*-%\s*', replacer, texto_de_traducao)

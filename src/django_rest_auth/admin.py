@@ -10,7 +10,7 @@ admin.site.index_title = 'Mytech Auth Rest'
 
 class TraducaoAdmin(admin.ModelAdmin):
     list_display_links = ('id',)
-    list_display = ['id', 'chave', 'traducao', 'lang']
+    list_display = ['id', 'chave', 'traducao', 'idioma']
 admin.site.register(Traducao, TraducaoAdmin)
 
 class EntidadeGroupAdmin(admin.ModelAdmin):

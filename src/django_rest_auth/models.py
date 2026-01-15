@@ -10,9 +10,32 @@ from django.db import models
 from rest_framework_simplejwt.tokens import RefreshToken
 
 
+class Idioma(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    nome = models.CharField(max_length=100, null=True)
+    code = models.CharField(max_length=100, null=True)
+    STATUS = (
+        ('Activo', 'Activo'),
+        ('Desativado', 'Desativado')
+    )
+    estado =models.CharField(max_length=100, default='Activo', null=True, choices=STATUS)
+    created_at = models.DateField(null=True, auto_now_add=True)
+    updated_at = models.DateField(null=True, auto_now=True)
+    created_at_time = models.DateField(null=True, auto_now_add=True)
+    updated_at_time = models.DateField(null=True, auto_now=True)
+    is_deleted = models.BooleanField(default=False)
+
+    class Meta:
+        permissions = (
+            ("list_idioma", "Can list idioma"),
+        )
+
+    def __str__(self):
+        return  self.code
+
 class Traducao(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    lang = models.TextField(null=True,blank=True)
+    idioma = models.TextField(Idioma=True,blank=True)
     chave = models.TextField(null=True, blank=True)
     traducao = models.TextField(null=True,blank=True)
     created_at = models.DateField(null=True, auto_now_add=True)
@@ -324,29 +347,6 @@ class Sucursal(models.Model):
         return  self.nome
 
 
-class Idioma(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    nome = models.CharField(max_length=100, null=True)
-    code = models.CharField(max_length=100, null=True)
-    STATUS = (
-        ('Activo', 'Activo'),
-        ('Desativado', 'Desativado')
-    )
-    estado =models.CharField(max_length=100, default='Activo', null=True, choices=STATUS)
-    created_at = models.DateField(null=True, auto_now_add=True)
-    updated_at = models.DateField(null=True, auto_now=True)
-    created_at_time = models.DateField(null=True, auto_now_add=True)
-    updated_at_time = models.DateField(null=True, auto_now=True)
-    is_deleted = models.BooleanField(default=False)
-
-    class Meta:
-        permissions = (
-            ("list_idioma", "Can list idioma"),
-        )
-
-    def __str__(self):
-        return  self.nome
-
 
 class EntidadeGroup(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -482,7 +482,7 @@ class TipoEntidadeModulo(models.Model):
 
     class Meta:
         permissions = (
-            ("list_tipoentidademodulo", "Can list tipoentidade modulo"),
+            ("list_tipoentidademodulo", "Can list tipo entidade modulo"),
         )
 
     def __str__(self):
