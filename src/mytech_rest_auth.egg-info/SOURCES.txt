@@ -10,6 +10,7 @@ src/django_rest_auth/midlleware.py
 src/django_rest_auth/models.py
 src/django_rest_auth/serializers.py
 src/django_rest_auth/sidebar.py
+src/django_rest_auth/signals.py
 src/django_rest_auth/urls.py
 src/django_rest_auth/views.py
 src/django_rest_auth/viewsApi.py
