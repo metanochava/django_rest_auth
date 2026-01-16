@@ -21,6 +21,7 @@ dependencies = [
   "drf-writable-nested==0.7.2",
   "Pillow",
   "pyotp",
+  "qrcode[pil]==7.4",
 
 ]
 
