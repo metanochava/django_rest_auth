@@ -23,72 +23,43 @@ class  TraducaoAPIView(viewsets.ModelViewSet):
         return self.queryset.filter()
 
 
-CACHE_TIMEOUT = 60 * 60  # 1 hora
 
-@action(detail=True, methods=['GET'])
-def traducoes(self, request, *args, **kwargs):
-    transformer = self.get_object()
-    lang_code = str(transformer.code).lower().replace('-', '')
-    cache_key = f"traducao:{lang_code}"
+    @action(detail=True, methods=['GET'])
+    def gettraducaos(self, request, *args, **kwargs):
+        CACHE_TIMEOUT = 60 * 60  # 1 hora
+        transformer = self.get_object()
+        lang_code = str(transformer.code).lower().replace('-', '')
+        cache_key = f"traducao:{lang_code}"
 
-    # 1️⃣ Tenta obter do cache
-    cached = cache.get(cache_key)
-    if cached is not None:
-        return Response(cached, status=status.HTTP_200_OK)
+        # 1️⃣ Tenta obter do cache
+        cached = cache.get(cache_key)
+        if cached is not None:
+            return Response(cached, status=status.HTTP_200_OK)
 
-    # 2️⃣ Caso não exista cache, constrói as traduções
-    traducoes = {}
+        # 2️⃣ Caso não exista cache, constrói as traduções
+        traducoes = {}
 
-    # Base de dados
-    db_traducoes = Traducao.objects.filter(idioma_id=transformer.id)
-    for tra in db_traducoes:
-        traducoes[tra.chave] = tra.traducao
+        # Base de dados
+        db_traducoes = Traducao.objects.filter(idioma_id=transformer.id)
+        for tra in db_traducoes:
+            traducoes[tra.chave] = tra.traducao
 
-    # Módulos lang
-    for app in apps.get_app_configs():
-        module_name = f"{app.name}.lang.{lang_code}"
+        # Módulos lang
+        for app in apps.get_app_configs():
+            module_name = f"{app.name}.lang.{lang_code}"
 
-        try:
-            modulo = importlib.import_module(module_name)
-        except ModuleNotFoundError:
-            continue
+            try:
+                modulo = importlib.import_module(module_name)
+            except ModuleNotFoundError:
+                continue
 
-        if hasattr(modulo, "key_value"):
-            traducoes.update(modulo.key_value)
+            if hasattr(modulo, "key_value"):
+                traducoes.update(modulo.key_value)
 
-    # 3️⃣ Guarda no cache
-    cache.set(cache_key, traducoes, CACHE_TIMEOUT)
+        # 3️⃣ Guarda no cache
+        cache.set(cache_key, traducoes, CACHE_TIMEOUT)
 
-    return Response(traducoes, status=status.HTTP_200_OK)
-
-
-    @action(
-        detail=True,
-        methods=['GET'],
-    )
-    def getTraducao(self, request, id):
-        traducaos = Traducao.objects.filter(idioma=id)
-        idioma = Idioma.objects.get(id=id)
-
-        traducao_ = []
-        for traducao in traducaos:
-            traducao_.append({traducao.chave: traducao.traducao})
-
-        if idioma.code:
-            pass
-        else:
-            idioma.code = "PT-PT"
-        # iterate over each line as a ordered dictionary and print only few column by column name
-        try:
-            with open(str(os.getcwd()) + '/core/lang/{}.csv'.format(idioma.code), 'r') as read_obj:
-                csv_dict_reader = DictReader(read_obj)
-                for row in csv_dict_reader:
-                    traducao_.append({row['chave']: row['traducao']})
-
-        except :
-            pass
-        return Response(traducao_,  status.HTTP_200_OK)
-
+        return Response(traducoes, status=status.HTTP_200_OK)
 
 class  FicheiroAPIView(viewsets.ModelViewSet):
 
