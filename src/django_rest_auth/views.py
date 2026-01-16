@@ -22,7 +22,7 @@ from django.core.mail import send_mail
 # env = environ.Env()
 from django.urls import reverse
 import jwt
-from drf_yasg import openapi
+
 from django.conf import settings
 
 # from .renderers import UserRenderer
@@ -266,7 +266,6 @@ class RegisterView(generics.GenericAPIView):
 
 class VerifyEmail(views.APIView):
     serializer_class = EmailVerificationSerializer
-    token_param_config = openapi.Parameter('token', in_=openapi.IN_QUERY, description='Description', type=openapi.TYPE_STRING)
     def get(self, request):
         token = request.GET.get('token')
         try:
