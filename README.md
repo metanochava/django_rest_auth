@@ -30,17 +30,6 @@ Este e para armazenar librires
         "fep",
     ]
 
-    dependencies = [
-    "Django>=5.2.8",
-    "djangorestframework==3.16.1",
-    "djangorestframework-simplejwt==5.2.2",
-    "rest-framework-simplejwt==0.0.2",
-    "drf-writable-nested==0.7.2",
-    "drf-yasg==1.21.11",
-    "pyotp==2.9.0",
-    "pillow==12.0.0",
-    "django-cors-headers==4.9.0",
-    ]
 
 ```
 
