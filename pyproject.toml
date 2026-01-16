@@ -22,6 +22,7 @@ dependencies = [
   "Pillow",
   "pyotp",
   "qrcode[pil]==7.4",
+  "python-barcode==0.15.1",
 
 ]
 
