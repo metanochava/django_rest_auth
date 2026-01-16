@@ -24,43 +24,7 @@ class  TraducaoAPIView(viewsets.ModelViewSet):
 
 
 
-    @action(detail=True, methods=['GET'])
-    def gettraducaos(self, request, *args, **kwargs):
-        CACHE_TIMEOUT = 60 * 60  # 1 hora
-        transformer = self.get_object()
-        lang_code = str(transformer.code).lower().replace('-', '')
-        cache_key = f"traducao:{lang_code}"
-
-        # 1️⃣ Tenta obter do cache
-        cached = cache.get(cache_key)
-        if cached is not None:
-            return Response(cached, status=status.HTTP_200_OK)
-
-        # 2️⃣ Caso não exista cache, constrói as traduções
-        traducoes = {}
-
-        # Base de dados
-        db_traducoes = Traducao.objects.filter(idioma_id=transformer.id)
-        for tra in db_traducoes:
-            traducoes[tra.chave] = tra.traducao
-
-        # Módulos lang
-        for app in apps.get_app_configs():
-            module_name = f"{app.name}.lang.{lang_code}"
-
-            try:
-                modulo = importlib.import_module(module_name)
-            except ModuleNotFoundError:
-                continue
-
-            if hasattr(modulo, "key_value"):
-                traducoes.update(modulo.key_value)
-
-        # 3️⃣ Guarda no cache
-        cache.set(cache_key, traducoes, CACHE_TIMEOUT)
-
-        return Response(traducoes, status=status.HTTP_200_OK)
-
+    
 class  FicheiroAPIView(viewsets.ModelViewSet):
 
     search_fields = ['id','ficheiro']
@@ -343,6 +307,44 @@ class  IdiomaAPIView(viewsets.ModelViewSet):
             return Response(data, status=status.HTTP_202_ACCEPTED)
         else:
             return Response(idioma.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+    @action(detail=True, methods=['GET'])
+    def traducaos(self, request, *args, **kwargs):
+        CACHE_TIMEOUT = 60 * 60  # 1 hora
+        transformer = self.get_object()
+        lang_code = str(transformer.code).lower().replace('-', '')
+        cache_key = f"traducao:{lang_code}"
+
+        # 1️⃣ Tenta obter do cache
+        cached = cache.get(cache_key)
+        if cached is not None:
+            return Response(cached, status=status.HTTP_200_OK)
+
+        # 2️⃣ Caso não exista cache, constrói as traduções
+        traducoes = {}
+
+        # Base de dados
+        db_traducoes = Traducao.objects.filter(idioma_id=transformer.id)
+        for tra in db_traducoes:
+            traducoes[tra.chave] = tra.traducao
+
+        # Módulos lang
+        for app in apps.get_app_configs():
+            module_name = f"{app.name}.lang.{lang_code}"
+
+            try:
+                modulo = importlib.import_module(module_name)
+            except ModuleNotFoundError:
+                continue
+
+            if hasattr(modulo, "key_value"):
+                traducoes.update(modulo.key_value)
+
+        # 3️⃣ Guarda no cache
+        cache.set(cache_key, traducoes, CACHE_TIMEOUT)
+
+        return Response(traducoes, status=status.HTTP_200_OK)
 
 
 class UsuarioAPIView(viewsets.ModelViewSet):

@@ -7,22 +7,21 @@ from django.urls import path, include
 from .import viewsApi, views
 from rest_framework import routers
 
+
 router = routers.DefaultRouter()
-router.register(r'ficheiros', viewsApi.FicheiroAPIView)
-router.register(r'idiomas', viewsApi.IdiomaAPIView)
-router.register(r'traducaos', viewsApi.TraducaoAPIView)
-router.register(r'inputs', viewsApi.InputAPIView)
-router.register(r'strings', viewsApi.StringAPIView)
-router.register(r'users', viewsApi.UsuarioAPIView)
+router.register(r'ficheiros', viewsApi.FicheiroAPIView, basename='ficheiro')
+router.register(r'idiomas', viewsApi.IdiomaAPIView, basename='idioma')
+router.register(r'traducaos', viewsApi.TraducaoAPIView, basename='traducao')
+router.register(r'inputs', viewsApi.InputAPIView, basename='input')
+router.register(r'strings', viewsApi.StringAPIView, basename='string')
+router.register(r'users', viewsApi.UsuarioAPIView, basename='usuario')
 
-router.register(r'tipoEntidades', viewsApi.TipoEntidadeAPIView)
-router.register(r'entidades', viewsApi.EntidadeAPIView)
-router.register(r'sucursals', viewsApi.SucursalAPIView)
-router.register(r'grupos', viewsApi.GrupoAPIView)
-router.register(r'permissions', viewsApi.PermissionAPIView)
-router.register(r'modelos', viewsApi.ModeloAPIView)
-
-
+router.register(r'tipoEntidades', viewsApi.TipoEntidadeAPIView, basename='tipo_entidade')
+router.register(r'entidades', viewsApi.EntidadeAPIView, basename='entidade')
+router.register(r'sucursals', viewsApi.SucursalAPIView, basename='sucursal')
+router.register(r'grupos', viewsApi.GrupoAPIView, basename='grupo')
+router.register(r'permissions', viewsApi.PermissionAPIView, basename='permission')
+router.register(r'modelos', viewsApi.ModeloAPIView, basename='modelo')
 
 
    
