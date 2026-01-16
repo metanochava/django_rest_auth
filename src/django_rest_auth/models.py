@@ -120,7 +120,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_verified_mobile = models.BooleanField(blank=False, default=False)
     counter = models.IntegerField(default=0, blank=False)   # For HOTP Verification
     email = models.EmailField(max_length=255, null=True, unique=True, blank=True, default=None)
-    language = models.ForeignKey(Idioma, on_delete=models.CASCADE)
+    language = models.ForeignKey(Idioma, on_delete=models.SET_NULL, null=True, blank=True )
     is_verified = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
