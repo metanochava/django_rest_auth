@@ -9,36 +9,28 @@ from .models import *
 from functools import wraps
 
 
-
-def check_permission(role, request):
+def check_permission(request, role):
     role = role or []
 
-    tipo_entidade_id = request.headers.get('ET')
-    entidade_id = request.headers.get('E')
-    sucursal_id = request.headers.get('S')
-    grupo_id = request.headers.get('G')
-
-    if not Entidade.objects.filter( id=entidade_id, tipo_entidade__id=tipo_entidade_id ).exists():
+    if not all([
+        request.user and request.user.is_authenticated,
+        request.tipo_entidade_id,
+        request.entidade_id,
+        request.sucursal_id,
+        request.grupo_id,
+        request.lang_id,
+    ]):
         return False
 
-    if not EntidadeUser.objects.filter( user=request.user, entidade_id=entidade_id ).exists():
-        return False
+    return SucursalUserGroup.objects.filter(
+        user=request.user,
+        group_id=request.grupo_id,
+        sucursal_id=request.sucursal_id,
+        sucursal__entidade_id=request.entidade_id,
+        sucursal__entidade__tipo_entidade_id=request.tipo_entidade_id,
+        group__permissions__codename__in=role,
+    ).exists()
 
-    if not Sucursal.objects.filter( id=sucursal_id, entidade__tipo_entidade__groups__id=grupo_id ).exists():
-        return False
-
-    if not SucursalUser.objects.filter( user=request.user, sucursal_id=sucursal_id ).exists():
-        return False
-
-    if not SucursalUserGroup.objects.filter( user=request.user, sucursal_id=sucursal_id, group_id=grupo_id ).exists():
-        return False
-
-    try:
-        grupo = Group.objects.get(id=grupo_id)
-    except Group.DoesNotExist:
-        return False
-
-    return grupo.permissions.filter(codename__in=role).exists()
 
 
 
@@ -46,13 +38,13 @@ def hasPermission(role=None):
     def decorator(view_func):
         @wraps(view_func)
         def wrapper(self, request, *args, **kwargs):
-            if check_permission(role, request):
+            if check_permission(request, role):
                 return view_func(self, request, *args, **kwargs)
 
-            txt = Translate.tdc( request.query_params.get('lang'), 'Permission denied')
+            txt = Translate.tdc(request, 'Permission denied')
             return Response( {'alert_error': txt}, status=status.HTTP_403_FORBIDDEN )
         return wrapper
     return decorator
 
-def isPermited(role=None, request=None):
-    return check_permission(role, request)
+def isPermited( request=None, role=None):
+    return check_permission(request, role)

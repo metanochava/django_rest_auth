@@ -2,7 +2,8 @@ import re
 import importlib
 from django.apps import apps
 from django.core.cache import cache
-from ..models import Idioma, Traducao  # import apenas os modelos necessários
+from ..models.idioma import Idioma  # import apenas os modelos necessários
+
 
 CACHE_TIMEOUT = 60 * 60  # 1 hora
 

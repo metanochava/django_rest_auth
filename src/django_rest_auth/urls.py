@@ -9,19 +9,19 @@ from rest_framework import routers
 
 
 router = routers.DefaultRouter()
-router.register(r'ficheiros', viewsApi.FicheiroAPIView, basename='ficheiro')
-router.register(r'idiomas', viewsApi.IdiomaAPIView, basename='idioma')
-router.register(r'traducaos', viewsApi.TraducaoAPIView, basename='traducao')
-router.register(r'inputs', viewsApi.InputAPIView, basename='input')
-router.register(r'strings', viewsApi.StringAPIView, basename='string')
-router.register(r'users', viewsApi.UsuarioAPIView, basename='usuario')
+router.register(r'ficheiros', viewsApi.FicheiroAPIView, basename='ficheiros')
+router.register(r'idiomas', viewsApi.IdiomaAPIView, basename='idiomas')
+router.register(r'traducaos', viewsApi.TraducaoAPIView, basename='traducaos')
+router.register(r'inputs', viewsApi.InputAPIView, basename='inputs')
+router.register(r'strings', viewsApi.StringAPIView, basename='strings')
+router.register(r'users', viewsApi.UsuarioAPIView, basename='users')
 
 router.register(r'tipoEntidades', viewsApi.TipoEntidadeAPIView, basename='tipo_entidade')
-router.register(r'entidades', viewsApi.EntidadeAPIView, basename='entidade')
-router.register(r'sucursals', viewsApi.SucursalAPIView, basename='sucursal')
-router.register(r'grupos', viewsApi.GrupoAPIView, basename='grupo')
-router.register(r'permissions', viewsApi.PermissionAPIView, basename='permission')
-router.register(r'modelos', viewsApi.ModeloAPIView, basename='modelo')
+router.register(r'entidades', viewsApi.EntidadeAPIView, basename='entidades')
+router.register(r'sucursals', viewsApi.SucursalAPIView, basename='sucursals')
+router.register(r'grupos', viewsApi.GrupoAPIView, basename='grupos')
+router.register(r'permissions', viewsApi.PermissionAPIView, basename='permissions')
+router.register(r'modelos', viewsApi.ModeloAPIView, basename='modelos')
 
 
    

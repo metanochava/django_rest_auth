@@ -1,3 +1,5 @@
+env:
+	pip install -e .
 up:
 	git add .; \
 	VERSION=$$(python -c "import tomli; print(tomli.load(open('pyproject.toml','rb'))['project']['version'])"); \
@@ -22,3 +24,18 @@ upv:
 	git push origin v$$VERSION; \
 	python -m build; \
 	twine upload dist/*; 
+install:
+	pip install -e .;
+migrations:
+	python3 src/manage.py makemigrations ;
+migrate:
+	python3 src/manage.py migrate ;
+superuser:
+	python3 src/manage.py createsuperuser ;
+run:
+	python3 src/manage.py runserver 84.247.162.222:12121 ;
+
+gitback:
+	git reset --soft HEAD~1
+gitrmcomited:
+	git rm --cached folder_file

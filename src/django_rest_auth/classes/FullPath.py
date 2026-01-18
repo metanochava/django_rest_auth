@@ -1,54 +1,123 @@
-import string
-import random
-from .Translation import Translation
+import time
+import hmac
+import hashlib
+from django.utils.crypto import constant_time_compare
+from urllib.parse import urlparse, urlunparse, parse_qs, urlencode
+from django_rest_auth.conf import get_setting
 
-from django.conf import settings
 
 class FullPath:
-    @staticmethod
-    def generate_file_url_token():
-        characters = string.ascii_letters + string.digits
-        code = ''
-        translacao = random.choice(string.digits.replace('0', ''))
-        encode_key = int(random.choice(string.digits.replace('0', '')))
-        code = code.join(translacao)
-        chave_encriptada = Translation.encrypt(settings.URL_FILE_KEY, encode_key)
 
-        for i in range(len(chave_encriptada)):
-            separacao = ''
-            for j in range(int(translacao)):
-                separacao = separacao + random.choice(characters)
-            code = code + separacao + chave_encriptada[i]
-
-        code = code + str(encode_key)
-        return code
+    # -------------------------
+    # TOKEN CORE
+    # -------------------------
 
     @staticmethod
-    def get_key_file_url_token(code):
+    def _generate_token(expire_at=0):
+        key = get_setting('FILE_TOKEN.KEY')
+        if not key:
+            return None
+
+        payload = str(expire_at)
+        signature = hmac.new(
+            key.encode(),
+            payload.encode(),
+            hashlib.sha256
+        ).hexdigest()
+
+        return f'{payload}.{signature}'
+
+    # -------------------------
+    # PUBLIC API
+    # -------------------------
+
+    @staticmethod
+    def generate_permanent_token():
+        if not get_setting('FILE_TOKEN.ENABLE_PERMANENT'):
+            return None
+        return FullPath._generate_token(0)
+
+    @staticmethod
+    def generate_temporary_token():
+        if not get_setting('FILE_TOKEN.ENABLE_TEMPORARY'):
+            return None
+
+        ttl = int(get_setting('FILE_TOKEN.TEMP_TTL', 300))
+        expire_at = int(time.time()) + ttl
+        return FullPath._generate_token(expire_at)
+
+    @staticmethod
+    def validate_token(token):
         try:
-            translacao = int(code[0])
-        except Exception:
-            return ''
-        try:
-            encode_key = int(code[-1])
-        except Exception:
-            return ''
-            
-        chave = ''
-        j = 0
-        tamanho = (len(code[1:-1]) / translacao)
-        for i in range(int(tamanho)):
-            j = j + 1
-            help = (translacao * j) + j
-            try:
-                chave = chave + code[1:-1][help - 1]
-            except Exception as e:
-                pass
-        return Translation.decrypt(chave, encode_key)
+            payload, signature = token.split('.')
+        except ValueError:
+            return False
+
+        key = get_setting('FILE_TOKEN.KEY')
+        if not key:
+            return False
+
+        expected = hmac.new(
+            key.encode(),
+            payload.encode(),
+            hashlib.sha256
+        ).hexdigest()
+
+        if not constant_time_compare(signature, expected):
+            return False
+
+        expire_at = int(payload)
+        if expire_at and time.time() > expire_at:
+            return False
+
+        return True
+
+    # -------------------------
+    # URL BUILDER
+    # -------------------------
+
+   
 
     @staticmethod
-    def url(request, name):
-        gerado = FullPath.generate_file_url_token()
-        return request.build_absolute_uri(name) +'?token=' + gerado 
+    def url(request, file_url, temporary=True):
+        """
+        Gera URL protegida para FileField / ImageField.
 
-    
+        Aceita:
+        - instance.file.url
+        - path relativo
+        - URL absoluta
+
+        Constrói URL com token de acesso a ficheiros.
+        - temporary=True  → token com expiração
+        - temporary=False → token permanente
+        """
+
+        if not file_url:
+            return None
+
+        token = (
+            FullPath.generate_temporary_token()
+            if temporary
+            else FullPath.generate_permanent_token()
+        )
+
+        if not token:
+            return None
+
+        parsed = urlparse(file_url)
+
+        # Caso já seja URL absoluta
+        if parsed.scheme and parsed.netloc:
+            base_url = file_url
+        else:
+            base_url = request.build_absolute_uri(file_url)
+
+        parsed = urlparse(base_url)
+        query = parse_qs(parsed.query)
+        query['token'] = token
+
+        return urlunparse(
+            parsed._replace(query=urlencode(query, doseq=True))
+        )
+

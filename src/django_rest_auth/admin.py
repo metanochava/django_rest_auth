@@ -1,67 +1,104 @@
 from django.contrib import admin
 from django.contrib.auth.models import Permission
-from .models import *
 
+# django_rest_auth/models/__init__.py
+
+
+from .models.traducao import Traducao
+from .models.idioma import Idioma
+from .models.entidade import Entidade, EntidadeUser, EntidadeModulo, EntidadeGroup
+from .models.sucursal import Sucursal, SucursalUser, SucursalUserGroup, SucursalGroup
+from .models.tipo_entidade import TipoEntidade, TipoEntidadeModulo
+from .models.ficheiro import Ficheiro
+from .models.user import UserLogin
+from .models.modulo import Modulo
+from .models.front_end import FrontEnd
+from django.contrib.auth import get_user_model
+User = get_user_model()
 
 admin.site.site_title = 'Auth'
 admin.site.index_title = 'Mytech Auth Rest'
 
 
-
+@admin.register(Traducao)
 class TraducaoAdmin(admin.ModelAdmin):
+    def get_list_display(self, request):
+        return [field.name for field in self.model._meta.fields]
     list_display_links = ('id',)
-    list_display = ['id', 'chave', 'traducao', 'idioma']
-admin.site.register(Traducao, TraducaoAdmin)
+    
 
+
+
+@admin.register(EntidadeGroup)
 class EntidadeGroupAdmin(admin.ModelAdmin):
-    list_display = ['id', 'entidade', 'group']
+    def get_list_display(self, request):
+        return [field.name for field in self.model._meta.fields]
     list_display_links = ('id',)
-admin.site.register(EntidadeGroup, EntidadeGroupAdmin)
 
+
+
+@admin.register(Ficheiro)
 class FicheiroAdmin(admin.ModelAdmin):
+    def get_list_display(self, request):
+        return [field.name for field in self.model._meta.fields]
     list_display_links = ('id',)
-    list_display =['id', 'ficheiro', 'size', 'modelo', 'estado', 'chamador', 'funcionalidade', 'sucursal', 'entidade', 'created_at', 'updated_at', 'created_at_time', 'updated_at_time', 'is_deleted']
-admin.site.register(Ficheiro, FicheiroAdmin)
+    
 
+
+@admin.register(Permission)
 class PermissionAdmin(admin.ModelAdmin):
-    list_display = ['id', 'name', 'codename', 'content_type']
+    def get_list_display(self, request):
+        return [field.name for field in self.model._meta.fields]
     list_display_links = ('id',)
     search_fields = ['id', 'name']
-admin.site.register(Permission, PermissionAdmin)
 
+
+@admin.register(FrontEnd)
 class FrontEndAdmin(admin.ModelAdmin):
-    list_display = ['id', 'nome', 'fek', 'fep', 'rule', 'created_at', 'updated_at', 'created_at_time', 'updated_at_time', 'is_deleted']
-admin.site.register(FrontEnd, FrontEndAdmin)
+    def get_list_display(self, request):
+        return [field.name for field in self.model._meta.fields]
 
 
+@admin.register(Idioma)
 class IdiomaAdmin(admin.ModelAdmin):
-    list_display = ['id', 'nome',  'code' ]
+    def get_list_display(self, request):
+        return [field.name for field in self.model._meta.fields]
     list_display_links = ('id', )
     search_fields = ['id',  'nome' ]
-admin.site.register(Idioma, IdiomaAdmin)
 
 
+
+@admin.register(TipoEntidade)
 class TipoEntidadeAdmin(admin.ModelAdmin):
-    list_display = ['id', 'nome', 'icon', 'created_at', 'updated_at', 'is_deleted']
+    def get_list_display(self, request):
+        return [field.name for field in self.model._meta.fields]
     list_display_links = ('id', 'nome',)
     search_fields = ['nome']
-admin.site.register(TipoEntidade, TipoEntidadeAdmin)
 
 
+
+@admin.register(User)
 class UserAdmin(admin.ModelAdmin):
-    list_display = ['id', 'username', 'mobile','is_verified_mobile', 'counter', 'email', 'perfil', 'language', 'is_verified', 'is_active', 'is_staff', 'updated_at', 'auth_provider', 'created_at']
+    def get_list_display(self, request):
+        return [field.name for field in self.model._meta.fields]
     list_display_links = ('id', 'username', 'email')
     search_fields = ['username', 'mobile', 'email', 'nome', 'nome_meio', 'apelido']
-admin.site.register(User, UserAdmin)
 
+
+
+@admin.register(UserLogin)
 class UserLoginAdmin(admin.ModelAdmin):
-    list_display = ['id', 'user', 'dispositivo', 'info', 'mobile', 'local_nome', 'local_lat', 'local_lon', 'data', 'hora', 'is_blocked']
+    def get_list_display(self, request):
+        return [field.name for field in self.model._meta.fields]
     list_display_links = ('id', )
     search_fields = ['local_nome', 'dispositivo', 'user' ]
-admin.site.register(UserLogin, UserLoginAdmin)
 
+
+
+@admin.register(Entidade)
 class EntidadeAdmin(admin.ModelAdmin):
-    list_display = ['id', 'nome', 'logo', 'admin_list', 'display_logo', 'display_qr', 'display_bar',  'tipo_entidade',  'disc_space', 'disc_used_space', 'disc_free_space', 'rodape', 'estado', 'created_at', 'updated_at', 'is_deleted']
+    def get_list_display(self, request):
+        return [field.name for field in self.model._meta.fields]
     list_display_links = ('id', 'nome',)
     search_fields = ['nome']
 
@@ -70,46 +107,71 @@ class EntidadeAdmin(admin.ModelAdmin):
             [u.username for u in obj.admins.all()]
         )
     admin_list.short_description = "admins"
-admin.site.register(Entidade, EntidadeAdmin)
 
+
+
+@admin.register(EntidadeUser)
 class EntidadeUserAdmin(admin.ModelAdmin):
-    list_display = ['id', 'user', 'entidade', 'created_at', 'updated_at', 'is_deleted']
+    def get_list_display(self, request):
+        return [field.name for field in self.model._meta.fields]
     list_display_links = ('id', 'user',)
     search_fields = ['user']
-admin.site.register(EntidadeUser, EntidadeUserAdmin)
 
+
+
+@admin.register(Sucursal)
 class SucursalAdmin(admin.ModelAdmin):
-    list_display = ['id', 'nome',  'created_at', 'updated_at', 'is_deleted']
+    def get_list_display(self, request):
+        return [field.name for field in self.model._meta.fields]
     list_display_links = ('id', 'nome',)
     search_fields = ['nome']
-admin.site.register(Sucursal, SucursalAdmin)
 
+
+@admin.register(SucursalGroup)
 class SucursalGroupAdmin(admin.ModelAdmin):
-    list_display = ['id', 'sucursal', 'group', 'created_at', 'updated_at', 'is_deleted']
+    def get_list_display(self, request):
+        return [field.name for field in self.model._meta.fields]
     list_display_links = ('id', 'sucursal',  'group',)
     search_fields = ['sucursal', 'group']
-admin.site.register(SucursalGroup, SucursalGroupAdmin)
 
+
+
+@admin.register(SucursalUser)
 class SucursalUserAdmin(admin.ModelAdmin):
-    list_display = ['id', 'sucursal', 'user', 'created_at', 'updated_at', 'is_deleted']
+    def get_list_display(self, request):
+        return [field.name for field in self.model._meta.fields]
     list_display_links = ('id', 'sucursal',  'user',)
     search_fields = ['sucursal', 'user']
-admin.site.register(SucursalUser, SucursalUserAdmin)
 
+
+
+@admin.register(SucursalUserGroup)
 class SucursalUserGroupAdmin(admin.ModelAdmin):
-    list_display = ['id', 'sucursal', 'user', 'group', 'created_at', 'updated_at', 'is_deleted']
+    def get_list_display(self, request):
+        return [field.name for field in self.model._meta.fields]
     list_display_links = ('id', 'sucursal',  'user','group', )
     search_fields = ['sucursal', 'user', 'group']
-admin.site.register(SucursalUserGroup, SucursalUserGroupAdmin)
 
+
+
+@admin.register(EntidadeModulo)
 class EntidadeModuloAdmin(admin.ModelAdmin):
-    list_display = ['id', 'entidade', 'modulo', 'estado','created_at', 'updated_at', 'is_deleted']
+    def get_list_display(self, request):
+        return [field.name for field in self.model._meta.fields]
     list_display_links = ('id', 'entidade', 'modulo',)
     search_fields = ['entidade', 'modulo',]
-admin.site.register(EntidadeModulo, EntidadeModuloAdmin)
 
+
+
+@admin.register(TipoEntidadeModulo)
 class TipoEntidadeModuloAdmin(admin.ModelAdmin):
-    list_display = ['id', 'tipo_entidade', 'modulo', 'estado', 'created_at', 'updated_at', 'is_deleted']
+    def get_list_display(self, request):
+        return [field.name for field in self.model._meta.fields]
     list_display_links = ('id', 'tipo_entidade', 'modulo',)
     search_fields = ['tipo_entidade', 'modulo',]
-admin.site.register(TipoEntidadeModulo, TipoEntidadeModuloAdmin)
+
+
+@admin.register(Modulo)
+class ModuloAdmin(admin.ModelAdmin):
+    def get_list_display(self, request):
+        return [field.name for field in self.model._meta.fields]
