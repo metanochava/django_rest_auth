@@ -1,6 +1,8 @@
 from django.db import models
 
-from .models import User, Entidade, Sucursal
+from django_rest_auth.models.user import User
+from django_rest_auth.models.entidade import Entidade
+from django_rest_auth.models.sucursal import Sucursal
 
 
 class AuditLog(models.Model):

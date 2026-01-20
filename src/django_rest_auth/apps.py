@@ -5,4 +5,4 @@ class DjangoRestAuthConfig(AppConfig):
     verbose_name = "Rest Auth"
 
     def ready(self):
-        import django_rest_auth.signals
+        import django_rest_auth.core.signals

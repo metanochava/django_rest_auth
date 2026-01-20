@@ -1,8 +1,6 @@
 import uuid
-
 from django.db import models
-
-from ..models.idioma import Idioma
+from django_rest_auth.models.idioma import Idioma
 
 
 class Traducao(models.Model):
@@ -15,4 +13,4 @@ class Traducao(models.Model):
         permissions = ()
 
     def __str__(self):
-        return self.chave
+        return self.chave or ''

@@ -1,0 +1,75 @@
+from django.db.models import Q
+
+from rest_framework import serializers
+from rest_framework.exceptions import AuthenticationFailed
+
+from django_rest_auth.models.user import User
+from django_rest_auth.core.utils.translate import Translate
+
+
+def authenticate(value=None, password=None):
+    try:
+        user = User.objects.get(
+            Q(email=value) |
+            Q(username=value) |
+            Q(mobile=value)
+        )
+    except User.DoesNotExist:
+        return None
+
+    if user.check_password(password):
+        return user
+
+    return None
+
+
+class LoginSerializer(serializers.Serializer):
+    identifier = serializers.CharField()
+    password = serializers.CharField(write_only=True)
+    tokens = serializers.SerializerMethodField(read_only=True)
+
+    def get_tokens(self, obj):
+        return obj['tokens']
+
+    def validate(self, attrs):
+        request = self.context.get('request')
+
+        identifier = attrs.get('identifier', '').strip()
+        password = attrs.get('password')
+
+        user = authenticate(
+            value=identifier,
+            password=password
+        )
+
+        if not user:
+            raise AuthenticationFailed(
+                Translate.tdc(
+                    request,
+                    'Credenciais inválidas'
+                )
+            )
+
+        if not user.is_active:
+            raise AuthenticationFailed(
+                Translate.tdc(
+                    request,
+                    'Conta desactivada'
+                )
+            )
+
+        if not user.is_verified:
+            raise AuthenticationFailed(
+                Translate.tdc(
+                    request,
+                    'Email não verificado'
+                )
+            )
+
+        return {
+            'id': user.id,
+            'email': user.email,
+            'username': user.username,
+            'mobile': user.mobile,
+            'tokens': user.tokens(),
+        }

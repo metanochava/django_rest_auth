@@ -43,18 +43,18 @@ SUBMENUS = [
         "rota": "list_perfil",
     }, 
     {
-        "menu": "Usuario",
+        "menu": "Users",
         "icon": "face",
         "role": "list_user",
-        "rota": "list_usuario",
+        "rota": "list_user",
     },{
-        "menu": "UsuarioAll",
+        "menu": "UserAll",
         "icon": "people",
         "role": "list_user_all",
-        "rota": "list_usuarioall",
+        "rota": "list_userall",
     },  
     {
-        "menu": "input",
+        "menu": "Inputs",
         "icon": "input",
         "role": "list_input",
         "rota": "list_input",

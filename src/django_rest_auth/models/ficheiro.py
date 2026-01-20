@@ -1,35 +1,21 @@
 import uuid
-
 from django.db import models
 
 
 class Ficheiro(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     ficheiro = models.FileField(upload_to='ficheiros', null=True, blank=True)
-    size = models.FloatField(null=False)
-    modelo = models.CharField(max_length=100, null=True)
+    size = models.FloatField()
+    modelo = models.CharField(max_length=100, null=True, help_text='Nome do modelo que originou o ficheiro')
 
-    estado = models.IntegerField(
-        default=1,
-        null=True,
-        choices=((0, 'Inativo'), (1, 'Ativo'))
-    )
+    estado = models.IntegerField(default=1, null=True, choices=((0, 'Inactivo'), (1, 'Activo')))
 
     ESCOLHA = (
-        ('File', 'File'),
-        ('Perfil', 'Perfil'),
-        ('Logo', 'Logo'),
-        ('Foto', 'Foto'),
-        ('CapaSite', 'CapaSite'),
+        ('File', 'File'), ('Perfil', 'Perfil'), ('Logo', 'Logo'),
+        ('Foto', 'Foto'), ('CapaSite', 'CapaSite'),
     )
 
-    funcionalidade = models.CharField(
-        max_length=100,
-        null=True,
-        default='File',
-        choices=ESCOLHA
-    )
-
+    funcionalidade = models.CharField(max_length=100, null=True, default='File', choices=ESCOLHA)
     chamador = models.CharField(max_length=100, null=True, blank=True)
 
     class Meta:

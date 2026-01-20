@@ -26,6 +26,9 @@ upv:
 	twine upload dist/*; 
 install:
 	pip install -e .;
+
+check:
+	python3 src/manage.py check ;
 migrations:
 	python3 src/manage.py makemigrations ;
 migrate:

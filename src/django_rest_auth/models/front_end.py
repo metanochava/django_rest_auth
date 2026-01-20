@@ -1,24 +1,29 @@
 import uuid
-
 from django.db import models
 
-from ..base import BaseModel
 
-
-class FrontEnd(BaseModel):
+class FrontEnd(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    nome = models.CharField(max_length=100, null=True)
-    fek = models.CharField(max_length=300, null=True)
-    fep = models.CharField(max_length=300, null=True)
 
-    ACCESS_CHOICES = (
-        ('read', 'Read'),
-        ('write', 'Write'),
-        ('readwrite', 'Read & Write'),
-        ('super', 'Super (all) 😎'),
+    nome = models.CharField(max_length=100)
+    fek = models.CharField(max_length=255, unique=True)
+    fep = models.CharField(max_length=255)
+
+    access = models.CharField(
+        max_length=20,
+        choices=(
+            ('read', 'Read'),
+            ('write', 'Write'),
+            ('readwrite', 'Read & Write'),
+            ('super', 'Super'),
+        ),
+        default='read',
     )
 
-    access = models.CharField(max_length=100, null=True, choices=ACCESS_CHOICES)
+    estado = models.IntegerField(
+        default=1,
+        choices=((0, 'Inativo'), (1, 'Ativo')),
+    )
 
     class Meta:
         permissions = ()
