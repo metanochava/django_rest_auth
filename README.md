@@ -22,7 +22,7 @@ Example:
 
 ```bash
 python
-from django_rest_auth.classes.Translate import Translate
+from django_saas.classes.Translate import Translate
 
 return Response({
     'alert_error': Translate.tdc(request, 'Permission denied')
@@ -268,7 +268,7 @@ Se qualquer condição falhar → acesso negado.
 
 Todas as APIs devem herdar de:
 
-django_rest_auth.views.BaseViewSet
+ds.views.BaseViewSet
 
 O que o BaseViewSet faz
 
@@ -415,6 +415,16 @@ criar exemplos reais do RH
 
 ```
 
+
+
+
+
+
+
+
+Criar BaseService com out() reutilizável
+
+Adicionar --dry-run
 
 
 

@@ -1,1 +1,1 @@
-default_app_config = "django_rest_auth.apps.DjangoRestAuthConfig"
+default_app_config = "django_saas.apps.DjangoRestAuthConfig"

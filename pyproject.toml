@@ -27,8 +27,8 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/metanochava/django_rest_auth"
-Repository = "https://github.com/metanochava/django_rest_auth"
+Homepage = "https://github.com/metanochava/ds"
+Repository = "https://github.com/metanochava/ds"
 
 [tool.setuptools.packages.find]
 where = ["src"]
