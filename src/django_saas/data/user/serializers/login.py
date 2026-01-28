@@ -55,7 +55,7 @@ class LoginSerializer(serializers.Serializer):
                 Translate.tdc(request, "Conta desactivada")
             )
 
-        if not user.is_verified:
+        if not user.is_verified_email:
             raise AuthenticationFailed(
                 Translate.tdc(request, "Email não verificado")
             )

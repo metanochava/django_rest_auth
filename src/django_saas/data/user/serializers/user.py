@@ -6,6 +6,7 @@ from django_saas.models.user import User
 
 
 class UserSerializer(BaseSerializer):
+    
     class Meta:
         model = User
         fields = ['id', 'email', 'username', 'perfil', 'mobile']

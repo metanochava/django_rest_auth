@@ -17,6 +17,7 @@ from django_saas.models.tipo_entidade import TipoEntidade
 from django_saas.models.entidade import Entidade
 from django_saas.models.entidade_user import EntidadeUser
 from django_saas.models.tipo_entidade_modulo import TipoEntidadeModulo
+from django_saas.models.sucursal_user_group import SucursalUserGroup
 
 from django_saas.data.tipo_entidade.serializers.tipo_entidade import (
     TipoEntidadeSerializer
@@ -133,29 +134,6 @@ class TipoEntidadeAPIView(viewsets.ModelViewSet):
             resultado.append(app)
 
         return Response(resultado, status=status.HTTP_200_OK)
-
-    @action(detail=True, methods=['GET'])
-    def menus(self, request, *args, **kwargs):
-        menus = []
-
-        for app in apps.get_app_configs():
-            module_name = f'{app.name}.sidebar'
-            if not importlib.util.find_spec(module_name):
-                continue
-
-            sidebar = importlib.import_module(module_name)
-
-            menus.append(
-                {
-                    'app': app.label,
-                    'menu': sidebar.MENU,
-                    'icon': sidebar.ICON,
-                    'role': sidebar.ROLE,
-                    'submenu': sidebar.SUBMENUS,
-                }
-            )
-
-        return Response(menus, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=['GET'])
     def modelos(self, request, id):

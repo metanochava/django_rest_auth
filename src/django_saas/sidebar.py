@@ -1,27 +1,45 @@
 
 MENU = "Core"
 ICON = "menu"
-ROLE = "core"
 
 
+ 
 SUBMENUS = [
     {
         "menu": "Dashboard",
         "icon": "dashboard",
-        "role": ROLE + "dashboard",
-        "rota": ROLE + "dashboard",
+        "role": "view_django_saas_dashboard",
+        "rota": "view_django_saas_dashboard",
     },
     {
-        "menu": "Tipoentidade",
+        "menu": "TipoEntidade",
         "icon": "corporate_fare",
         "role": "list_tipoentidade",
         "rota": "list_tipoentidade",
+        "add_role": "add_tipoentidade",
+        "add_rota": "add_tipoentidade",
     },    
     {
         "menu": "Entidades",
         "icon": "home",
         "role": "list_entidade",
         "rota": "list_entidade",
+        "submenu": [
+            {
+                "menu": "Entidades",
+                "icon": "home",
+                "role": "list_entidade",
+                "rota": "list_entidade",
+                "add_role": "add_tipoentidad",
+                "add_rota": "add_tipoentidade",
+            },
+            {
+                "menu": "Entidades",
+                "icon": "home",
+                "role": "list_entidade",
+                "rota": "list_entidade",
+            }
+        ]
     },  
      
     {
@@ -37,10 +55,10 @@ SUBMENUS = [
         "rota": "list_sucursal",
     }, 
     {
-        "menu": "Perfil",
+        "menu": "Grupos",
         "icon": "groups",
-        "role": "list_perfil",
-        "rota": "list_perfil",
+        "role": "list_group",
+        "rota": "list_group",
     }, 
     {
         "menu": "Users",
@@ -58,11 +76,13 @@ SUBMENUS = [
         "icon": "input",
         "role": "list_input",
         "rota": "list_input",
-    }, {
+    }, 
+    {
         "menu": "Cometario",
         "icon": "mode_comment",
         "role": "list_cometario",
         "rota": "list_cometario",
+        
     }, 
     
 ]

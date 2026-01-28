@@ -14,7 +14,7 @@ from django_saas.models.idioma import Idioma
 from django_saas.models.entidade import Entidade
 from django_saas.models.entidade_user import EntidadeUser
 from django_saas.models.entidade_modulo import EntidadeModulo
-from django_saas.models.entidade_grupo import EntidadeGroup
+from django_saas.models.entidade_group import EntidadeGroup
 
 from django_saas.models.sucursal import Sucursal
 from django_saas.models.sucursal_user import SucursalUser

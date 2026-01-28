@@ -46,7 +46,7 @@ router = routers.DefaultRouter()
 
 router.register("ficheiros", FicheiroAPIView, basename="ficheiros")
 router.register("idiomas", IdiomaAPIView, basename="idiomas")
-router.register("traducoes", TraducaoAPIView, basename="traducoes")
+router.register("traducaos", TraducaoAPIView, basename="traducaos")
 router.register("inputs", InputAPIView, basename="inputs")
 router.register("strings", StringAPIView, basename="strings")
 router.register("tipoEntidades", TipoEntidadeAPIView, basename="tipo_entidades")
@@ -71,7 +71,7 @@ urlpatterns = [
     path("me/", MeAPIView.as_view(), name="me"),
 
     path("email/verify/", VerifyEmail.as_view(), name="email_verify"),
-    path("token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
+    path("refresh_token/", TokenRefreshView.as_view(), name="token_refresh"),
 
     path("logins/", LoginsAPIView.as_view(), name="logins"),
 

@@ -185,8 +185,8 @@ class EntidadeAPIView(viewsets.ModelViewSet):
         return Response(
             [
                 {
-                    'id': em.modelo.id,
-                    'nome': em.modelo.nome
+                    'id': em.modulo.id,
+                    'nome': em.modulo.nome
                 }
                 for em in ent_mods
             ],

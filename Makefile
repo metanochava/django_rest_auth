@@ -1,6 +1,13 @@
 env:
 	source venv/bin/activate; 
-up:
+push:
+	find . -name "__pycache__" -type d -exec rm -rf {} + ; \
+	git add .; \
+	VERSION=$$(python -c "import tomli; print(tomli.load(open('pyproject.toml','rb'))['project']['version'])"); \
+	read -p "Mensagem do release: $$VERSION " m; \
+	git commit -m "release: v$$VERSION - $$m"; \
+	git push origin main;  
+pushpip:
 	find . -name "__pycache__" -type d -exec rm -rf {} + ; \
 	git add .; \
 	VERSION=$$(python -c "import tomli; print(tomli.load(open('pyproject.toml','rb'))['project']['version'])"); \
@@ -9,13 +16,6 @@ up:
 	git push origin main; \
 	python -m build; \
 	twine upload dist/*; 
-upgit:
-	find . -name "__pycache__" -type d -exec rm -rf {} + ; \
-	git add .; \
-	VERSION=$$(python -c "import tomli; print(tomli.load(open('pyproject.toml','rb'))['project']['version'])"); \
-	read -p "Mensagem do release: $$VERSION " m; \
-	git commit -m "release: v$$VERSION - $$m"; \
-	git push origin main;  
 upv:
 	find . -name "__pycache__" -type d -exec rm -rf {} + ; \
 	git add .; \
@@ -47,3 +47,8 @@ gitback:
 gitrmc:
 	read -p "Digite o caminho do ficheiro ou pasta " m; \
 	git rm --cached $$m
+gitignoreon:
+	chattr -i .gitignore;
+gitignoreoff:
+	chattr +i .gitignore;
+

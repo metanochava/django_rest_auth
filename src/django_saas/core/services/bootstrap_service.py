@@ -7,6 +7,13 @@ from django_saas.models.sucursal import Sucursal
 from django_saas.models.entidade_user import EntidadeUser
 from django_saas.models.sucursal_user import SucursalUser
 from django_saas.models.sucursal_user_group import SucursalUserGroup
+from django_saas.models.entidade_group import EntidadeGroup
+from django_saas.models.sucursal_group import SucursalGroup
+from django_saas.models.modulo import Modulo
+from django_saas.models.tipo_entidade_modulo import TipoEntidadeModulo
+from django_saas.models.entidade_modulo import EntidadeModulo
+
+
 
 
 class BootstrapService:
@@ -18,7 +25,7 @@ class BootstrapService:
         tipo = cls.create_tipo_entidade(stdout, style)
         entidade = cls.create_entidade(tipo, user, stdout, style)
         sucursal = cls.create_sucursal(entidade, user, stdout, style)
-        grupo = cls.create_grupo(user, sucursal, stdout, style)
+        grupo = cls.create_grupo(user, entidade, sucursal, stdout, style)
 
         return {
             "tipo_entidade": tipo,
@@ -32,8 +39,9 @@ class BootstrapService:
     # ------------------------
     @staticmethod
     def create_tipo_entidade(stdout=None, style=None):
+        nome = input("Digite seu nome do Tipo de Entidade: ")
         tipo, _ = TipoEntidade.objects.get_or_create(
-            nome="Saas",
+            nome=nome,
             defaults={"estado": 1}
         )
 
@@ -47,8 +55,9 @@ class BootstrapService:
     # ------------------------
     @staticmethod
     def create_entidade(tipo_entidade, user, stdout=None, style=None):
+        nome = input("Digite seu nome da Entidade: ")
         entidade, _ = Entidade.objects.get_or_create(
-            nome="Mytech",
+            nome=nome,
             tipo_entidade=tipo_entidade
         )
 
@@ -58,6 +67,26 @@ class BootstrapService:
             user=user,
             entidade=entidade
         )
+
+        for name in ['django_saas', 'rh']:
+            modulo, _ = Modulo.objects.get_or_create(
+                nome=name,
+                defaults={"estado": 1}
+            )
+
+            tipo_entidade_modulo, _ = TipoEntidadeModulo.objects.get_or_create(
+                modulo=modulo,
+                tipo_entidade=tipo_entidade,
+                defaults={"estado": 1}
+            )
+
+            entidade_modulo, _ = EntidadeModulo.objects.get_or_create(
+                modulo=modulo,
+                entidade=entidade,
+                defaults={"estado": 1}
+            )
+
+            stdout.write(style.WARNING(f"✔ {'Modulo:':20} {modulo.nome}"))
 
         if stdout and style:
             stdout.write(style.SUCCESS(f"✔ {'Entidade:':20} {entidade.nome}"))
@@ -69,8 +98,9 @@ class BootstrapService:
     # ------------------------
     @staticmethod
     def create_sucursal(entidade, user, stdout=None, style=None):
+        nome = input("Digite seu nome da Sucursal: ")
         sucursal, _ = Sucursal.objects.get_or_create(
-            nome="Sede",
+            nome=nome,
             entidade=entidade
         )
 
@@ -88,10 +118,24 @@ class BootstrapService:
     # Grupo + SucursalUserGroup
     # ------------------------
     @staticmethod
-    def create_grupo(user, sucursal, stdout=None, style=None):
+    def create_grupo(user,entidade, sucursal, stdout=None, style=None):
         grupo, _ = Group.objects.get_or_create(name="Admin")
 
+        # ligar grupo à sucursal
+        SucursalGroup.objects.get_or_create(
+            sucursal=sucursal,
+            group=grupo
+        )
+
+        # ligar grupo ao tenant (entidade)
+        EntidadeGroup.objects.get_or_create(
+            entidade=entidade,
+            group=grupo
+        )
+
         user.groups.add(grupo)
+
+        
 
         SucursalUserGroup.objects.get_or_create(
             user=user,
@@ -101,5 +145,8 @@ class BootstrapService:
 
         if stdout and style:
             stdout.write(style.SUCCESS(f"✔ {'Grupo:':20} {grupo.name}"))
+            stdout.write(style.SUCCESS(f"✔ {'EntidadeGrupo':20} OK"))
+            stdout.write(style.SUCCESS(f"✔ {'SucursalGrupo':20} OK"))
+
 
         return grupo

@@ -76,7 +76,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         blank=True
     )
 
-    is_verified = models.BooleanField(default=False)
+    is_verified_email = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
 

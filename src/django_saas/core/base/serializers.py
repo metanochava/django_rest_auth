@@ -22,10 +22,13 @@ class BaseSerializer(serializers.ModelSerializer):
         permanent = set(getattr(self, 'permanent_fields_files', []))
 
         for field in instance._meta.fields:
+            
             if not isinstance(field, (models.FileField, models.ImageField)):
                 continue
 
             file = getattr(instance, field.name)
+            
+
             if not file:
                 data[field.name] = None
                 continue
@@ -43,7 +46,8 @@ class BaseSerializer(serializers.ModelSerializer):
                     'ext': ext,
                     'size': getattr(file, 'size', None)
                 }
-            except Exception:
+            except Exception as e:
+                print("❌ ERRO AO PROCESSAR FILE:", e)
                 data[field.name] = None
 
         return data

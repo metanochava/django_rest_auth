@@ -83,8 +83,8 @@ class IdiomaAPIView(viewsets.ModelViewSet):
         return Response(response, status=status.HTTP_201_CREATED)
 
     @action(detail=True, methods=["GET"])
-    def traducoes(self, request, *args, **kwargs):
-        CACHE_TIMEOUT = 60 * 60  # 1 hora
+    def traducaos(self, request, *args, **kwargs):
+        CACHE_TIMEOUT = 1 * 20  # 1 hora
 
         idioma = self.get_object()
         lang_code = str(idioma.code).lower().replace("-", "")

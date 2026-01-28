@@ -5,6 +5,10 @@ from django.contrib.contenttypes.models import ContentType
 from django.db.models.signals import post_migrate
 from django.dispatch import receiver
 
+import importlib
+import importlib.util
+
+
 
 @receiver(post_migrate)
 def create_model_list_permissions(sender, **kwargs):
@@ -12,8 +16,9 @@ def create_model_list_permissions(sender, **kwargs):
     Cria automaticamente permissão 'list_<modelo>'
     apenas para apps definidos em settings.MY_APPS
     """
+    MY_APPS = getattr(settings, 'MY_APPS', [])  + ['django.contrib.auth',]
 
-    allowed_apps = [app.split('.')[-1] for app in getattr(settings, 'MY_APPS', [])]
+    allowed_apps = [app.split('.')[-1] for app in MY_APPS]
 
     if not allowed_apps:
         return
@@ -30,4 +35,23 @@ def create_model_list_permissions(sender, **kwargs):
             codename=f'list_{model_name}',
             content_type=content_type,
             defaults={'name': f'Can list {verbose_name}'}
+        )
+
+    
+
+    for app in apps.get_app_configs():
+        module_name = f"{app.name}. "
+        if not importlib.util.find_spec(module_name):
+            continue
+
+        sidebar = importlib.import_module(module_name)
+        content_type, _ = ContentType.objects.get_or_create(
+            app_label=app.name,
+            model= f'{app.name} | sidebar'
+        )
+
+        Permission.objects.get_or_create(
+            codename=f'view_{app.name}_dashboard',
+            content_type=content_type,
+            defaults={'name': f'Can view {app.name} dashboard'}
         )

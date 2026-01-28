@@ -17,7 +17,7 @@ class FullPath:
 
     @staticmethod
     def _generate_token(expire_at=0):
-        from django_saas.conf import get_setting  # lazy import
+        from django_saas.core.conf import get_setting  # lazy import
 
         key = get_setting('FILE_TOKEN.KEY')
         if not key:
@@ -38,7 +38,7 @@ class FullPath:
 
     @staticmethod
     def generate_permanent_token():
-        from django_saas.conf import get_setting  # lazy import
+        from django_saas.core.conf import get_setting  # lazy import
 
         if not get_setting('FILE_TOKEN.ENABLE_PERMANENT'):
             return None
@@ -46,7 +46,7 @@ class FullPath:
 
     @staticmethod
     def generate_temporary_token():
-        from django_saas.conf import get_setting  # lazy import
+        from django_saas.core.conf import get_setting  # lazy import
 
         if not get_setting('FILE_TOKEN.ENABLE_TEMPORARY'):
             return None
@@ -57,7 +57,7 @@ class FullPath:
 
     @staticmethod
     def validate_token(token):
-        from django_saas.conf import get_setting  # lazy import
+        from django_saas.core.conf import get_setting  # lazy import
 
         try:
             payload, signature = token.split('.')

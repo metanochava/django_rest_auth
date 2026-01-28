@@ -8,6 +8,7 @@ class SucursalGroup(TimeModel):
     group = models.ForeignKey(Group, on_delete=models.CASCADE)
 
     class Meta:
+        unique_together = ("sucursal", "group")
         permissions = ()
 
     def __str__(self):
