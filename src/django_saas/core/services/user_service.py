@@ -10,11 +10,11 @@ class UserService:
     def get_or_create_superuser(stdout=None, style=None):
         email = input("Digite o email: ")
         username = input("Digite o username: ")
-
         user, created = User.objects.get_or_create(
             email=email,
             defaults={
                 "username": username,
+                'is_verified_email': True,
                 "is_staff": True,
                 "is_superuser": False,
             }
@@ -23,7 +23,7 @@ class UserService:
         if created:
             # 🔐 pedir password pelo teclado (sem mostrar)
             while True:
-                password = getpass.getpass("Password do Admin : ")
+                password = getpass.getpass("🔐 Password do superuser: ")
                 password_confirm = getpass.getpass("Confirme a password: ")
 
                 if not password:
@@ -39,17 +39,8 @@ class UserService:
                     continue
 
                 break
-            password = getpass.getpass("🔐 Password do superuser: ")
             user.set_password(password)
             user.save()
-
-            if stdout and style:
-                stdout.write(
-                    style.SUCCESS(f"✔ Superuser criado: \t {user.email} \n")
-                )
-                stdout.write(
-                    style.NOTICE(f"👤 Username: \t {user.username} \n")
-                )
         else:
             if stdout and style:
                 stdout.write(

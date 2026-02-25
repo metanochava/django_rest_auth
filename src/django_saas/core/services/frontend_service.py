@@ -45,7 +45,13 @@ class FrontEndService:
                     )
                 else:
                     stdout.write(
-                        style.WARNING(f"\n FrontEnd já existe: {frontend.nome}")
+                        style.WARNING(f"\nFrontEnd já existe: {frontend.nome}")
+                    )
+                    stdout.write(
+                        style.NOTICE(f"  FEK: {frontend.fek}")
+                    )
+                    stdout.write(
+                        style.WARNING(f"  FEP: {frontend.fep}")
                     )
 
         return True

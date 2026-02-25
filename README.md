@@ -1,13 +1,16 @@
+apt install libpango-1.0-0 libpangoft2-1.0-0 libffi-dev libxml2 libxslt1.1
+pip install weasyprint
+
 ## ViewSet Rule
 
 All concrete ViewSets MUST define a base queryset.
 
-The BaseViewSet only applies multi-tenant filters and permissions,
+The BaseAPIView only applies multi-tenant filters and permissions,
 it does not define the base queryset.
 
 Example:
 ```bash 
-    class PessoaViewSet(BaseViewSet):
+    class PessoaViewSet(BaseAPIView):
         queryset = Pessoa.objects.select_related('user', 'endereco')
 
 ```
@@ -142,7 +145,7 @@ Groups (auth_group)
 
 Contexto dinâmico via headers
 
-Validação automática no BaseViewSet
+Validação automática no BaseAPIView
 
 Uma única query por request (alta performance)
 
@@ -182,7 +185,7 @@ ET	ID do Tipo de Entidade
 E	ID da Entidade
 S	ID da Sucursal
 G	ID do Grupo
-L	Idioma (opcional)
+L	Idioma 
 
 📌 Sem estes headers, o acesso é negado.
 
@@ -264,13 +267,13 @@ grupo possui a permissão solicitada
 
 Se qualquer condição falhar → acesso negado.
 
-🧩 BaseViewSet (Automático)
+🧩 BaseAPIView (Automático)
 
 Todas as APIs devem herdar de:
 
-ds.views.BaseViewSet
+ds.views.BaseAPIView
 
-O que o BaseViewSet faz
+O que o BaseAPIView faz
 
 ✔️ valida permissões automaticamente
 
@@ -304,7 +307,7 @@ method_permission  >  permission_action_map
 
 📌 Exemplos Práticos
 ✔️ ViewSet simples (CRUD padrão)
-class ColaboradorViewSet(BaseViewSet):
+class ColaboradorViewSet(BaseAPIView):
     queryset = Colaborador.objects.all()
     serializer_class = ColaboradorSerializer
 
@@ -317,7 +320,7 @@ change_colaborador
 delete_colaborador
 
 ✔️ Action custom (bulk_create)
-class ColaboradorViewSet(BaseViewSet):
+class ColaboradorViewSet(BaseAPIView):
     queryset = Colaborador.objects.all()
     serializer_class = ColaboradorSerializer
 
@@ -335,7 +338,7 @@ Permissão exigida:
 add_colaborador
 
 ✔️ Sobrescrever permissão de action padrão
-class ColaboradorViewSet(BaseViewSet):
+class ColaboradorViewSet(BaseAPIView):
     method_permission = {
         'list': 'view',
     }
@@ -347,7 +350,7 @@ view_colaborador
 
 🚫 O que NÃO fazer
 
-❌ Criar views sem herdar de BaseViewSet
+❌ Criar views sem herdar de BaseAPIView
 ❌ Ignorar headers de contexto
 ❌ Usar decorators de permissão em views
 ❌ Implementar lógica de tenant fora do core
@@ -388,6 +391,48 @@ criar exemplos reais do RH
 
 É só dizer 🚀
 
+
+
+# MetanoStack Architecture Rules
+
+## Core Principles
+
+1. Every model MUST inherit from BaseModel
+2. Every serializer MUST inherit from BaseSerializer
+3. Every viewset MUST inherit from BaseAPIView
+4. No relative imports allowed
+5. One class per file
+6. User model must be django_saas User
+7. Multi-tenant enforced via middleware
+8. No business logic inside ViewSets
+9. Serializers define API contract (OpenAPI source of truth)
+10. RH must support skills (Especialidades)
+
+## Forbidden Patterns
+
+- class X(models.Model)
+- class X(ModelSerializer)
+- class X(ModelViewSet)
+- from . import something
+- Big models.py files
+
+## Structure Standard
+
+module/
+ ├─ models/
+ ├─ serializers/
+ ├─ views/
+ ├─ services/
+ └─ urls.py
+
+## Enterprise Compliance
+
+- Audit fields required
+- UUID primary keys
+- Soft delete via estado
+- Multi-tenant aware
+
+
     INSTALLED_APPS = [
         'corsheaders',
         ...
@@ -421,10 +466,6 @@ criar exemplos reais do RH
 
 
 
-
-Criar BaseService com out() reutilizável
-
-Adicionar --dry-run
 
 
 

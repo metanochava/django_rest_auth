@@ -157,7 +157,7 @@ class UserAPIView(viewsets.ModelViewSet):
             permissions = grupo.permissions.all()
 
             for permission in permissions:
-                per.append({'id': permission.id, 'nome': permission.codename, 'nomeseparado': permission.name})
+                per.append({'id': permission.id, 'codename': permission.codename, 'name': permission.name})
 
         if True:
             return Response(per, status.HTTP_200_OK)

@@ -15,6 +15,7 @@ class FullPath:
     # TOKEN CORE
     # -------------------------
 
+
     @staticmethod
     def _generate_token(expire_at=0):
         from django_saas.core.conf import get_setting  # lazy import

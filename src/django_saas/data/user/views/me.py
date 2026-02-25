@@ -14,5 +14,4 @@ class MeAPIView(generics.GenericAPIView):
             context={'request': request}
         )
         data = serializer.data.copy()
-        data['alert_success'] = Translate.tdc( request, 'Dados do utilizador carregados com sucesso' )
         return Response( data, status=status.HTTP_200_OK)

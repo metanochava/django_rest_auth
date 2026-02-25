@@ -3,7 +3,7 @@ import uuid
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from rest_framework_simplejwt.tokens import RefreshToken
-
+from django_saas.models.pessoa import Pessoa
 
 
 class UserManager(BaseUserManager):
@@ -29,13 +29,13 @@ class UserManager(BaseUserManager):
         return user
 
 
-AUTH_PROVIDERS = {
-    'facebook': 'facebook',
-    'google': 'google',
-    'twitter': 'twitter',
-    'email': 'email',
-    'mobile': 'maobile'
-}
+AUTH_PROVIDERS = (
+    ('email', 'email'),
+    ('facebook', 'facebook'),
+    ('google', 'google'),
+    ('twitter', 'twitter'),
+    ('mobile', 'maobile')
+)
 
 
 def profile_image_path(instance, file_name):
@@ -47,6 +47,13 @@ class User(AbstractBaseUser, PermissionsMixin):
     perfil = models.ImageField(
         default='user.png',
         upload_to=profile_image_path,
+        null=True,
+        blank=True
+    )
+
+    pessoa = models.OneToOneField(
+        'Pessoa',
+        on_delete=models.SET_NULL,
         null=True,
         blank=True
     )
@@ -76,6 +83,8 @@ class User(AbstractBaseUser, PermissionsMixin):
         blank=True
     )
 
+
+
     is_verified_email = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
@@ -85,7 +94,8 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     auth_provider = models.CharField(
         max_length=255,
-        default=AUTH_PROVIDERS.get('email')
+        default='email',
+        choices=AUTH_PROVIDERS
     )
 
     USERNAME_FIELD = 'email'

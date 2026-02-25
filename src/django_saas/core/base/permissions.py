@@ -8,8 +8,8 @@ from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
 
 from django_saas.core.utils.translate import Translate
-from django_saas.models.sucursal import SucursalUserGroup
-from django_rest_auth.models.entidade_modulo import EntidadeModulo
+from django_saas.models.sucursal_user_group import SucursalUserGroup
+from django_saas.models.entidade_modulo import EntidadeModulo
 
 
 class HasAppPermission(BasePermission):
@@ -40,7 +40,7 @@ class HasAppPermission(BasePermission):
 
         allowed = check_permission(
             request=request,
-            role=[codename]
+            role=codename
         )
 
         if not allowed:
@@ -51,25 +51,26 @@ class HasAppPermission(BasePermission):
 
 
 def check_permission(request, role):
-    role = role or []
+    role = role 
 
     if not all([
-        request.user and request.user.is_authenticated,
+        request.user,
+        request.user.is_authenticated,
         request.tipo_entidade_id,
         request.entidade_id,
         request.sucursal_id,
-        request.grupo_id,
+        request.group_id,
         request.lang_id,
     ]):
         return False
 
     return SucursalUserGroup.objects.filter(
         user=request.user,
-        group_id=request.grupo_id,
+        group_id=request.group_id,
         sucursal_id=request.sucursal_id,
         sucursal__entidade_id=request.entidade_id,
         sucursal__entidade__tipo_entidade_id=request.tipo_entidade_id,
-        group__permissions__codename__in=role,
+        group__permissions__codename=role,
     ).exists()
 
 
@@ -77,7 +78,7 @@ def hasModulo(codigo):
     def decorator(func):
         @wraps(func)
         def wrapper(self, request, *args, **kwargs):
-            entidade_id = request.headers.get("E")
+            entidade_id = request.entidade_id
 
             if not EntidadeModulo.objects.filter(
                 entidade_id=entidade_id,

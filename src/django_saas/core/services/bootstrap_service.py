@@ -20,11 +20,11 @@ class BootstrapService:
 
     @classmethod
     @transaction.atomic
-    def run(cls, user, stdout=None, style=None):
+    def run(cls, tipo_entidade, entidade, sucursal, user, grupo, stdout=None, style=None):
 
-        tipo = cls.create_tipo_entidade(stdout, style)
-        entidade = cls.create_entidade(tipo, user, stdout, style)
-        sucursal = cls.create_sucursal(entidade, user, stdout, style)
+        tipo = cls.create_tipo_entidade(tipo_entidade, stdout, style)
+        entidade = cls.create_entidade(tipo, entidade, user, stdout, style)
+        sucursal = cls.create_sucursal(entidade, sucursal, user, stdout, style)
         grupo = cls.create_grupo(user, entidade, sucursal, stdout, style)
 
         return {
@@ -38,8 +38,7 @@ class BootstrapService:
     # TipoEntidade
     # ------------------------
     @staticmethod
-    def create_tipo_entidade(stdout=None, style=None):
-        nome = input("Digite seu nome do Tipo de Entidade: ")
+    def create_tipo_entidade(nome, stdout=None, style=None):
         tipo, _ = TipoEntidade.objects.get_or_create(
             nome=nome,
             defaults={"estado": 1}
@@ -54,8 +53,7 @@ class BootstrapService:
     # Entidade + EntidadeUser
     # ------------------------
     @staticmethod
-    def create_entidade(tipo_entidade, user, stdout=None, style=None):
-        nome = input("Digite seu nome da Entidade: ")
+    def create_entidade(tipo_entidade, nome, user, stdout=None, style=None):
         entidade, _ = Entidade.objects.get_or_create(
             nome=nome,
             tipo_entidade=tipo_entidade
@@ -97,8 +95,7 @@ class BootstrapService:
     # Sucursal + SucursalUser
     # ------------------------
     @staticmethod
-    def create_sucursal(entidade, user, stdout=None, style=None):
-        nome = input("Digite seu nome da Sucursal: ")
+    def create_sucursal(entidade, nome, user, stdout=None, style=None):
         sucursal, _ = Sucursal.objects.get_or_create(
             nome=nome,
             entidade=entidade

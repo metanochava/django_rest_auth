@@ -5,6 +5,7 @@ from rest_framework.exceptions import AuthenticationFailed
 
 from django_saas.models.user import User
 from django_saas.core.utils.translate import Translate
+from django.utils import timezone
 
 
 def authenticate(value=None, password=None):
@@ -18,9 +19,12 @@ def authenticate(value=None, password=None):
         return None
 
     if user.check_password(password):
+        user.last_login = timezone.now()
+        user.save(update_fields=['last_login'])
         return user
 
     return None
+
 class LoginSerializer(serializers.Serializer):
     identifier = serializers.CharField(write_only=True)
     password = serializers.CharField(write_only=True)

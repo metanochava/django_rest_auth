@@ -240,7 +240,7 @@ class EntidadeAPIView(viewsets.ModelViewSet):
         entidade_users = EntidadeUser.objects.filter(
             entidade=transformer,
             user__username__icontains=search,
-            is_deleted=False
+            deleted_at__isnull=True,
         ).order_by('-user__username')
 
         page = self.paginate_queryset(entidade_users)
@@ -255,7 +255,7 @@ class EntidadeAPIView(viewsets.ModelViewSet):
         exists = EntidadeUser.objects.filter(
             entidade=transformer,
             user=user,
-            is_deleted=False
+            deleted_at__isnull=True
         ).exists()
 
         if not exists:
@@ -283,11 +283,10 @@ class EntidadeAPIView(viewsets.ModelViewSet):
         entidade_user = EntidadeUser.objects.filter(
             entidade=transformer,
             user__id=request.query_params.get('user'),
-            is_deleted=False
+            deleted_at__isnull=True
         ).first()
 
         if entidade_user:
-            entidade_user.is_deleted = True
             entidade_user.save()
             return Response(status=status.HTTP_204_NO_CONTENT)
 

@@ -10,7 +10,6 @@ class Endereco(TimeModel):
     longitude = models.DecimalField(
         max_digits=9, decimal_places=6, null=True, blank=True
     )
-
     rua = models.CharField(max_length=255, null=True, blank=True)
     numero = models.CharField(max_length=50, null=True, blank=True)
     bairro = models.CharField(max_length=100, null=True, blank=True)
@@ -24,6 +23,7 @@ class Endereco(TimeModel):
         verbose_name = 'Endereço'
         verbose_name_plural = 'Endereços'
         permissions = ()
+        
 
     def __str__(self):
         return ', '.join(filter(None, [

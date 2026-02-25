@@ -23,6 +23,11 @@ dependencies = [
   "pyotp",
   "qrcode[pil]==7.4",
   "python-barcode==0.15.1",
+  "black",
+  "questionary==2.1.1",
+  "rich",
+  "weasyprint",
+  "django-money",
 
 ]
 

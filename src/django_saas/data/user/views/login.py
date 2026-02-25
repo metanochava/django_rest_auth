@@ -44,11 +44,8 @@ class LoginAPIView(generics.GenericAPIView):
         # user_login = LoginSerializer(data=data)
         # user_login.is_valid(raise_exception=True)
         # user_login.save()
+        
         response = serializer.data.copy()   # ← dados do serializer
-        response["alert_success"] = Translate.tdc(
-            request,
-            "Login efectuado com sucesso"
-        )
 
         return Response(
             response,

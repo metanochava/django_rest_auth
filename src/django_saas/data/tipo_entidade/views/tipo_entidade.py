@@ -54,7 +54,7 @@ class TipoEntidadeAPIView(viewsets.ModelViewSet):
                     entidade=entidade,
                     user=request.user
                 )
-                logo = FullPath.url(request, entidade.logo.name)
+                logo = FullPath.url(request, entidade.logo.name, temporary=False)
                 resultado.append(
                     {
                         'id': entidade.id,
