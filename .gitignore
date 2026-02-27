@@ -10,6 +10,7 @@
 # Don't sync user-specific files
 .project/complete_drafts.txt
 .project/localProjectSettings.json
+.project/localProjectSwap.json
 copilot-messages.log
 
 # Archive formats
@@ -46,16 +47,3 @@ copilot-messages.log
 # System files
 .DS_Store
 .project/attachments/files/**
-
-.project
-__pycache__
-dist
-files
-dev
-mediafiles
-.env
-manage.py
-db.sqlite3
-mytech_rest_auth.egg*
-venv
-4FEA-35EC

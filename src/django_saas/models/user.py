@@ -4,6 +4,7 @@ from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from rest_framework_simplejwt.tokens import RefreshToken
 from django_saas.models.pessoa import Pessoa
+from django_saas.core.base.models import TimeModel
 
 
 class UserManager(BaseUserManager):
@@ -42,7 +43,7 @@ def profile_image_path(instance, file_name):
     return f'images/users/{instance.id}/{file_name}'
 
 
-class User(AbstractBaseUser, PermissionsMixin):
+class User(AbstractBaseUser, PermissionsMixin, TimeModel):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     perfil = models.ImageField(
         default='user.png',
@@ -51,14 +52,10 @@ class User(AbstractBaseUser, PermissionsMixin):
         blank=True
     )
 
-    pessoa = models.OneToOneField(
-        'Pessoa',
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True
-    )
-
     username = models.CharField(max_length=255, unique=False)
+    first_name = models.CharField(max_length=255, unique=False, null=True, blank=True)
+    last_name = models.CharField(max_length=255, unique=False, null=True, blank=True)
+
     mobile = models.CharField(
         max_length=55,
         null=True,

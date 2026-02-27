@@ -3,6 +3,7 @@ import uuid
 from django.db import models
 from django.contrib.contenttypes.models import ContentType
 
+
 from django_saas.models.user import User
 from django_saas.models.tipo_entidade import TipoEntidade
 
@@ -24,8 +25,6 @@ class Entidade(TimeModel):
 
     tipo_entidade = models.ForeignKey(TipoEntidade, on_delete=models.CASCADE)
 
-    groups = models.ManyToManyField('auth.Group', blank=True)
-    modelos = models.ManyToManyField(ContentType, blank=True)
     admins = models.ManyToManyField(User)
 
     rodape = models.CharField(max_length=2000, null=True)

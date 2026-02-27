@@ -18,7 +18,7 @@ class Sucursal(TimeModel):
     icon = models.CharField(max_length=100, default='.', null=True)
     label = models.CharField(max_length=100, default='.', null=True)
 
-    groups = models.ManyToManyField(Group, blank=True)
+    # groups = models.ManyToManyField(Group, blank=True)
 
     class Meta:
         permissions = ()

@@ -32,6 +32,8 @@ from django_saas.models.sucursal_group import SucursalGroup
 
 from django_saas.models.tipo_entidade import TipoEntidade
 from django_saas.models.tipo_entidade_modulo import TipoEntidadeModulo
+from django_saas.models.tipo_entidade_modelo import TipoEntidadeModelo
+from django_saas.models.entidade_modelo import EntidadeModelo
 from django_saas.models.ficheiro import Ficheiro
 from django_saas.models.user_login import UserLogin
 from django_saas.models.modulo import Modulo
@@ -78,6 +80,16 @@ class FicheiroAdmin(BaseAdmin):
     def get_list_display(self, request): return all_fields(self.model)
     list_display_links = ('id',)
 
+@admin.register(TipoEntidadeModelo)
+class TipoEntidadeModeloAdmin(BaseAdmin):
+    def get_list_display(self, request): return all_fields(self.model)
+    list_display_links = ('id',)
+
+@admin.register(EntidadeModelo)
+class EntidadeModeloAdmin(BaseAdmin):
+    def get_list_display(self, request): return all_fields(self.model)
+    list_display_links = ('id',)
+
 
 @admin.register(Permission)
 class PermissionAdmin(admin.ModelAdmin):
@@ -112,11 +124,19 @@ class TipoEntidadeAdmin(BaseAdmin):
     search_fields = ['nome']
 
 
+from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 @admin.register(User)
-class UserAdmin(BaseAdmin):
-    def get_list_display(self, request): return all_fields(self.model)
+class UserAdmin( BaseAdmin):
+    
+    def get_list_display(self, request):
+        exclude = ['password']
+        fields = all_fields(self.model)
+        return [f for f in fields if f not in exclude]
+
     list_display_links = ('id', 'username', 'email')
     search_fields = ['username', 'mobile', 'email']
+
+    readonly_fields = ('password',)
 
 
 @admin.register(UserLogin)

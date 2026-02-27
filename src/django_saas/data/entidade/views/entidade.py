@@ -28,6 +28,7 @@ from django_saas.models.sucursal import Sucursal
 from django_saas.models.sucursal_user import SucursalUser
 from django_saas.models.sucursal_user_group import SucursalUserGroup
 from django_saas.models.tipo_entidade import TipoEntidade
+from django_saas.models.entidade_modelo import EntidadeModelo
 from django_saas.models.user import User
 
 from django_saas.data.entidade.serializers.entidade import EntidadeSerializer
@@ -168,11 +169,11 @@ class EntidadeAPIView(viewsets.ModelViewSet):
         return Response(
             [
                 {
-                    'id': m.id,
-                    'model': m.model,
-                    'app_label': m.app_label
+                    'id': m.modelo.id,
+                    'model': m.modelo.model,
+                    'app_label': m.modelo.app_label
                 }
-                for m in entidade.modelos.all()
+                for m in EntidadeModelo.objects.filter(entidade__id=entidade.id)
             ],
             status=status.HTTP_200_OK
         )
@@ -197,7 +198,8 @@ class EntidadeAPIView(viewsets.ModelViewSet):
     def addModelo(self, request, *args, **kwargs):
         entidade = self.get_object()
         modelo = ContentType.objects.get(id=request.data['id'])
-        entidade.modelos.add(modelo)
+
+        ent, _ = EntidadeModelo.objects.get_or_create(entidade__id=entidade.id, modelo=modelo)
 
         return Response(
             {
@@ -212,7 +214,7 @@ class EntidadeAPIView(viewsets.ModelViewSet):
     def removeModelo(self, request, *args, **kwargs):
         entidade = self.get_object()
         modelo = ContentType.objects.get(id=request.data['id'])
-        entidade.modelos.remove(modelo)
+        EntidadeModelo.objects.filter(entidade__id=entidade.id, modelo=modelo).delete()
 
         return Response(
             {

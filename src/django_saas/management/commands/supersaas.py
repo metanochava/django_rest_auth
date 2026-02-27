@@ -14,6 +14,10 @@ from django_saas.models.modulo import Modulo
 from django_saas.models.tipo_entidade_modulo import TipoEntidadeModulo
 from django_saas.models.entidade_modulo import EntidadeModulo
 
+from django_saas.models.tipo_entidade_group import TipoEntidadeGroup
+from django_saas.models.entidade_group import EntidadeGroup
+from django_saas.models.sucursal_group import SucursalGroup
+
 User = get_user_model()
 
 
@@ -82,7 +86,7 @@ class Command(BaseCommand):
             "tipo_entidade": "SaaS",
             "entidade": "Mytech",
             "sucursal": "Sede",
-            "grupo": "SuperAdmin",
+            "grupo": ["Guest", "SuperAdmin", "Admin"],
         }
 
         # ------------------------
@@ -125,20 +129,38 @@ class Command(BaseCommand):
         # ------------------------
         # 4. Grupo
         # ------------------------
-        grupo, _ = Group.objects.get_or_create(
-            name=data["grupo"]
-        )
+        for g in data["grupo"]:
 
-        SucursalUserGroup.objects.get_or_create(
-            user=user,
-            sucursal=sucursal,
-            group=grupo
-        )
-        user.groups.add(grupo)
+            grupo, _ = Group.objects.get_or_create(
+                name=g
+            )
+
+            SucursalUserGroup.objects.get_or_create(
+                user=user,
+                sucursal=sucursal,
+                group=grupo
+            )
+
+            user.groups.add(grupo)
+
+            TipoEntidadeGroup.objects.get_or_create(
+                tipo_entidade=tipo_entidade,
+                group=grupo
+            )
+
+            EntidadeGroup.objects.get_or_create(
+                entidade=entidade,
+                group=grupo
+            )
+
+            SucursalGroup.objects.get_or_create(
+                sucursal=sucursal,
+                group=grupo
+            )
 
         self.stdout.write(self.style.WARNING(f"\n"))
 
-        for name in ['django_saas', 'rh']:
+        for name in ['django_saas',]:
             modulo, _ = Modulo.objects.get_or_create(
                 nome=name,
                 defaults={"estado": 1}
@@ -167,7 +189,7 @@ class Command(BaseCommand):
         self.stdout.write(self.style.HTTP_SUCCESS(f"{'TipoEntidade:':20} {tipo_entidade.nome}"))
         self.stdout.write(self.style.HTTP_NOT_MODIFIED(f"{'Entidade:':20} {entidade.nome}"))
         self.stdout.write(self.style.HTTP_SERVER_ERROR(f"{'Sucursal:':20} {sucursal.nome}"))
-        self.stdout.write(self.style.WARNING(f"{'Grupo:':20} {grupo.name}"))
+        self.stdout.write(self.style.WARNING(f"{'Grupos:':20} {data['grupo']}"))
         self.stdout.write(self.style.ERROR("⚠️  Guarde estas credenciais com segurança"))
         self.stdout.write(self.style.HTTP_INFO(f""))
         self.stdout.write(self.style.HTTP_INFO(f""))

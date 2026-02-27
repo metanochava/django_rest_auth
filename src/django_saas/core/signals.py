@@ -3,8 +3,13 @@ from django.conf import settings
 from django.contrib.auth.models import Permission, Group
 from django.contrib.contenttypes.models import ContentType
 from django.db.models.signals import post_migrate
-from django.dispatch import receiver
 import importlib
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+
+from django_saas.models.pessoa import Pessoa
+from django_saas.models.user import User
+
 
 
 @receiver(post_migrate)
@@ -40,21 +45,28 @@ def create_model_list_permissions(sender, **kwargs):
             content_type=ct,
             defaults={"name": f"Can list {model._meta.verbose_name}"},
         )
-        admin_group.permissions.add(perm)
+
+        perm, _ = Permission.objects.get_or_create(
+            codename=f"pdf_{model._meta.model_name}",
+            content_type=ct,
+            defaults={"name": f"Can pdf {model._meta.verbose_name}"},
+        )
+
 
         perm, _ = Permission.objects.get_or_create(
             codename=f"restore_{model._meta.model_name}",
             content_type=ct,
             defaults={"name": f"Can restore {model._meta.verbose_name}"},
         )
-        admin_group.permissions.add(perm)
+
 
         perm, _ = Permission.objects.get_or_create(
             codename=f"hard_delete_{model._meta.model_name}",
             content_type=ct,
             defaults={"name": f"Can hard delete {model._meta.verbose_name}"},
         )
-        admin_group.permissions.add(perm)
+
+
 
 
     # ==================================================
@@ -79,5 +91,28 @@ def create_model_list_permissions(sender, **kwargs):
             content_type=ct,
             defaults={"name": name},
         )
+    admin_group.permissions.add(*Permission.objects.filter())
 
-        admin_group.permissions.add(perm)
+
+
+
+@receiver(post_save, sender=User, dispatch_uid="criar_pessoa_user")
+def criar_pessoa_automaticamente(sender, instance, created, **kwargs):
+    if created:
+        Pessoa.objects.get_or_create(
+            user=instance,
+            defaults={
+                "nome": instance.first_name or "",
+                "apelido": instance.last_name or "",
+                "email": instance.email or "",
+            }
+        )
+
+@receiver(post_save, sender=User, dispatch_uid="sync_pessoa_user")
+def sync_pessoa(sender, instance, **kwargs):
+    if hasattr(instance, 'pessoa'):
+        pessoa = instance.pessoa
+        pessoa.nome = instance.first_name or ""
+        pessoa.apelido = instance.last_name or ""
+        pessoa.email = instance.email or ""
+        pessoa.save()

@@ -15,8 +15,6 @@ class TipoEntidade(TimeModel):
     label = models.CharField(max_length=100, null=True)
     ordem = models.IntegerField(default=2)
     crair_entidade = models.BooleanField(null=True, default=True)
-    groups = models.ManyToManyField(Group, blank=True)
-    modelos = models.ManyToManyField(ContentType, blank=True)
 
     class Meta:
         permissions = ()

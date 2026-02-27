@@ -18,6 +18,8 @@ from django_saas.models.entidade import Entidade
 from django_saas.models.entidade_user import EntidadeUser
 from django_saas.models.tipo_entidade_modulo import TipoEntidadeModulo
 from django_saas.models.sucursal_user_group import SucursalUserGroup
+from django_saas.models.tipo_entidade_modelo import TipoEntidadeModelo
+from django_saas.models.entidade_modelo import EntidadeModelo
 
 from django_saas.data.tipo_entidade.serializers.tipo_entidade import (
     TipoEntidadeSerializer
@@ -140,11 +142,11 @@ class TipoEntidadeAPIView(viewsets.ModelViewSet):
         tipo_entidade = TipoEntidade.objects.get(id=id)
         modelos = [
             {
-                'id': modelo.id,
-                'model': modelo.model,
-                'app_label': modelo.app_label,
+                'id': tem.modelo.id,
+                'model': tem.modelo.model,
+                'app_label': tem.modelo.app_label,
             }
-            for modelo in tipo_entidade.modelos.all()
+            for tem in TipoEntidadeModelo.filter(tipo_entidade__id=tipo_entidade.id)
         ]
         return Response(modelos, status=status.HTTP_200_OK)
 
@@ -153,9 +155,9 @@ class TipoEntidadeAPIView(viewsets.ModelViewSet):
         tipo_entidade = TipoEntidade.objects.get(id=id)
         modelo = ContentType.objects.get(id=request.data['id'])
 
-        tipo_entidade.modelos.add(modelo)
+        TipoEntidadeModelo.objects.get_or_create(tipo_entidade__id=tipo_entidade.id, modelo=modelo)
         for entidade in Entidade.objects.filter(tipo_entidade_id=id):
-            entidade.modelos.add(modelo)
+            EntidadeModelo.objects.get_or_create(entidade__id=entidade.id, modelo=modelo)
 
         return Response(
             {
@@ -174,9 +176,9 @@ class TipoEntidadeAPIView(viewsets.ModelViewSet):
         tipo_entidade = TipoEntidade.objects.get(id=id)
         modelo = ContentType.objects.get(id=request.data['id'])
 
-        tipo_entidade.modelos.remove(modelo)
+        TipoEntidadeModelo.objects.filter(tipo_entidade__id=tipo_entidade.id, modelo=modelo).delete()
         for entidade in Entidade.objects.filter(tipo_entidade_id=id):
-            entidade.modelos.remove(modelo)
+            EntidadeModelo.objects.filter(entidade__id=entidade.id, modelo=modelo).delete()
 
         return Response(
             {

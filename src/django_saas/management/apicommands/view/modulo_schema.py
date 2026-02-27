@@ -275,7 +275,7 @@ class ModuloSchemaAPIView(ModelViewSet):
         
 
 
-    # @hasPermission("delete_modulo")
+    @hasPermission("delete_modulo")
     def destroy(self, request, pk=None):
         name = pk
         self._ensure_dev(request)
@@ -315,8 +315,7 @@ class ModuloSchemaAPIView(ModelViewSet):
         except Exception as e:
             return fail(
                 request,
-                "module_creation_failed",
-                error=str(e)
+                "module_creation_failed \n "+ str(e),
             )
 
 
