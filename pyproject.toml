@@ -3,9 +3,9 @@ requires = ["setuptools>=61", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "mytech_saas"
-version = "1.1.11"
-description = "App de autenticação e gestão de entidades para Django REST Framework"
+name = "django_saas"
+version = "1.1.1"
+description = "Django SAAS Framework"
 readme = "README.md"
 license = { file = "LICENSE" }
 requires-python = ">=3.9"
