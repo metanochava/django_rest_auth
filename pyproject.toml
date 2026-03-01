@@ -28,6 +28,7 @@ dependencies = [
   "rich",
   "weasyprint",
   "django-money",
+  "python-dotenv",
 ]
 
 [project.urls]
