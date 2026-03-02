@@ -81,6 +81,7 @@ routerdjango_saas.register("modulos", ModuloSchemaAPIView, basename="modulos")
 routerdjango_saas.register("scaffolds", ScaffoldAPIView, basename="scaffolds")
 
 
+
 urlpatterns = [
     path("django_saas/", include(routerdjango_saas.urls)),
     path("auth/", include(routerauth.urls)),
