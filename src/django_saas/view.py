@@ -6,6 +6,165 @@ import json
 from datetime import datetime
 from django.conf import settings
 from django.http import JsonResponse, HttpResponse
+import os, json, subprocess
+from datetime import datetime
+from django.conf import settings
+from django.http import JsonResponse, HttpResponse
+from django.views.decorators.csrf import csrf_exempt
+
+DEPLOY_TOKEN = settings.DEPLOY_TOKEN  # mete no env/setting em produção
+
+STATUS_FILE = "/tmp/deploy_status.json"
+LOG_FILE = "/tmp/deploy.log"
+
+BASE_DIR = settings.BASE_DIR
+RELEASES_DIR = f"{BASE_DIR}/releases"
+CURRENT_LINK = f"{BASE_DIR}/back"
+
+
+def _write_status(status, msg="", extra=None):
+    data = {
+        "status": status,
+        "message": msg,
+        "time": datetime.now().isoformat()
+    }
+    if extra:
+        data.update(extra)
+    with open(STATUS_FILE, "w") as f:
+        json.dump(data, f)
+
+
+def _read_status():
+    if not os.path.exists(STATUS_FILE):
+        return {"status": "idle"}
+    with open(STATUS_FILE) as f:
+        return json.load(f)
+
+
+def _current_release():
+    try:
+        return os.path.realpath(CURRENT_LINK)
+    except Exception:
+        return None
+
+
+def _list_releases(limit=30):
+    if not os.path.isdir(RELEASES_DIR):
+        return []
+    items = sorted(os.listdir(RELEASES_DIR))
+    items = items[-limit:]
+    cur = _current_release()
+    out = []
+    for name in reversed(items):
+        path = os.path.join(RELEASES_DIR, name)
+        out.append({
+            "name": name,
+            "path": path,
+            "active": (cur == os.path.realpath(path)),
+        })
+    return out
+
+
+def _tail(path, n=300):
+    if not os.path.exists(path):
+        return ""
+    with open(path, "rb") as f:
+        f.seek(0, os.SEEK_END)
+        size = f.tell()
+        chunk = 8192
+        data = b""
+        while size > 0 and data.count(b"\n") < n + 1:
+            read = min(chunk, size)
+            size -= read
+            f.seek(size)
+            data = f.read(read) + data
+        return b"\n".join(data.splitlines()[-n:]).decode("utf-8", errors="replace")
+
+
+def _require_token(request):
+    return request.GET.get("token") == DEPLOY_TOKEN
+
+
+@csrf_exempt
+def deploy_github(request):
+    if not _require_token(request):
+        return HttpResponse("Unauthorized", status=403)
+
+    # aceita JSON { "ref": "refs/tags/v1.2.0" } ou { "tag": "v1.2.0" }
+    try:
+        payload = json.loads(request.body.decode("utf-8") or "{}")
+    except Exception:
+        payload = {}
+
+    ref = payload.get("ref", "") or request.POST.get("ref", "")
+    tag = payload.get("tag") or request.POST.get("tag")
+
+    if not tag and ref.startswith("refs/tags/"):
+        tag = ref.split("refs/tags/")[1]
+
+    if not tag:
+        return JsonResponse({"error": "tag ausente (envia ref refs/tags/<tag> ou tag=<tag>)"}, status=400)
+
+    script_path = getattr(settings, "DEPLOY_FILE_PATH", "/var/www/lib/deploy.sh")
+
+    _write_status("running", f"Deploy iniciado: {tag}", {"tag": tag})
+
+    # executa deploy.sh <tag>
+    with open(LOG_FILE, "a") as log:
+        subprocess.Popen(
+            [script_path, tag],
+            stdout=log,
+            stderr=subprocess.STDOUT,
+        )
+
+    return JsonResponse({"message": "Deploy iniciado", "tag": tag})
+
+
+def deploy_status(request):
+    if not _require_token(request):
+        return HttpResponse("Unauthorized", status=403)
+
+    st = _read_status()
+    st["current"] = _current_release()
+    return JsonResponse(st)
+
+
+def deploy_releases(request):
+    if not _require_token(request):
+        return HttpResponse("Unauthorized", status=403)
+    return JsonResponse({"current": _current_release(), "releases": _list_releases()})
+
+
+def deploy_logs(request):
+    if not _require_token(request):
+        return HttpResponse("Unauthorized", status=403)
+    return HttpResponse(_tail(LOG_FILE, n=400), content_type="text/plain")
+
+
+@csrf_exempt
+def deploy_rollback(request):
+    if not _require_token(request):
+        return HttpResponse("Unauthorized", status=403)
+
+    releases = _list_releases(limit=100)
+    active_idx = next((i for i, r in enumerate(releases) if r["active"]), None)
+    if active_idx is None:
+        return JsonResponse({"error": "não foi possível detectar release ativa"}, status=400)
+
+    # releases está em ordem “mais recente primeiro”
+    # rollback para a próxima da lista (mais antiga)
+    if active_idx + 1 >= len(releases):
+        return JsonResponse({"error": "não existe release anterior"}, status=400)
+
+    target = releases[active_idx + 1]["path"]
+
+    _write_status("running", "Rollback iniciado", {"target": target})
+
+    os.system(f"ln -sfn {target} {CURRENT_LINK}")
+    os.system("systemctl restart gunicorn_dev_back")
+
+    _write_status("success", "Rollback concluído", {"target": target, "current": _current_release()})
+    return JsonResponse({"message": "Rollback concluído", "current": _current_release(), "target": target})
 
 
 def home(request):
@@ -29,48 +188,74 @@ STATUS_FILE = "/tmp/deploy_status.json"
 DEPLOY_SCRIPT = f"""#!/bin/bash
 set -e
 
-LOCK_FILE="/tmp/deploy.lock"
+# ====== CONFIG ======
+BASE="/var/www"
+RELEASES="$BASE/releases"
+CURRENT="$BASE/back"              # symlink
+SHARED="$BASE/back_shared"
+REPO_URL="https://github.com/metanochava/django_rest_auth.git"
+SERVICE="gunicorn_dev_back"
 
-if [ -f "$LOCK_FILE" ]; then
-    echo "🚫 Deploy já em execução"
-    exit 1
+LOCK="/tmp/deploy.lock"
+LOG="/tmp/deploy.log"
+
+# TAG vem do argumento
+TAG="$1"
+
+if [ -z "$TAG" ]; then
+  echo "❌ Precisas passar a TAG. Ex: ./deploy.sh v1.2.0" | tee -a "$LOG"
+  exit 1
 fi
 
-trap "rm -f $LOCK_FILE" EXIT
-touch $LOCK_FILE
+# ====== LOCK ======
+if [ -f "$LOCK" ]; then
+  echo "🚫 Deploy já em execução" | tee -a "$LOG"
+  exit 1
+fi
+trap "rm -f $LOCK" EXIT
+touch "$LOCK"
 
-echo "🚀 Deploy iniciado..."
+TS=$(date +%Y%m%d%H%M%S)
+NEW_RELEASE="$RELEASES/${TAG}-${TS}"
 
-TIMESTAMP=$(date +%Y%m%d%H%M%S)
-NEW_RELEASE="{RELEASES_DIR}/$TIMESTAMP"
+mkdir -p "$RELEASES" "$SHARED"
+echo "🚀 Deploy TAG=$TAG -> $NEW_RELEASE" | tee -a "$LOG"
 
-echo "📁 Criando release: $NEW_RELEASE"
-mkdir -p $NEW_RELEASE
+# ====== CLONE + CHECKOUT TAG ======
+git clone --quiet "$REPO_URL" "$NEW_RELEASE"
+cd "$NEW_RELEASE"
+git checkout --quiet "$TAG"
 
-echo "📥 Clonando código..."
-git clone /var/www/back $NEW_RELEASE
+# ====== VENV (shared) ======
+# Assumindo venv em $SHARED/venv
+source "$SHARED/venv/bin/activate"
 
-cd $NEW_RELEASE
+# ====== ENV ======
+# se usas .env
+if [ -f "$SHARED/.env" ]; then
+  set -a
+  source "$SHARED/.env"
+  set +a
+fi
 
-echo "🐍 Ativando ambiente..."
-source {PROJECT_DIR}/venv/bin/activate
+# ====== INSTALL + MIGRATE + STATIC ======
+pip install -r requirements.txt >> "$LOG" 2>&1
+python manage.py migrate >> "$LOG" 2>&1
+python manage.py collectstatic --noinput >> "$LOG" 2>&1
 
-echo "📦 Instalando dependências..."
-pip install -r requirements.txt
+# ====== MEDIA (shared) ======
+# Se o projeto usa MEDIA_ROOT /var/www/back/mediafiles, ajusta para apontar pro shared:
+# Exemplo: ln -sfn "$SHARED/mediafiles" "$NEW_RELEASE/mediafiles"
+# (depende do teu settings.py)
+mkdir -p "$SHARED/mediafiles"
 
-echo "🗄️ Migrações..."
-python manage.py migrate
+# ====== SWITCH CURRENT ======
+ln -sfn "$NEW_RELEASE" "$CURRENT"
 
-echo "📁 Static..."
-python manage.py collectstatic --noinput
+# ====== RESTART ======
+systemctl restart "$SERVICE"
 
-echo "🔗 Atualizando symlink..."
-ln -sfn $NEW_RELEASE {CURRENT_LINK}
-
-echo "🔄 Reiniciando Gunicorn..."
-systemctl restart gunicorn_dev_back
-
-echo "✅ Deploy concluído"
+echo "✅ Deploy concluído: $TAG" | tee -a "$LOG"
 """
 
 # =========================

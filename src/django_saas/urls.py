@@ -60,8 +60,7 @@ from django_saas.management.apicommands.view.modulo_schema import ModuloSchemaAP
 from django_saas.data.pdf.views.invoice import invoice_pdf
 
 from django_saas.view import home
-from django_saas.view import deploy, deploy_tenant, rollback, deploy_logs, deploy_status
-
+from django_saas.view import deploy_github, deploy_status, deploy_releases, deploy_logs, deploy_rollback
 
 router, extra_patterns = build_saas_urls()
 
@@ -92,11 +91,11 @@ urlpatterns = [
 
     path('', home, name='home'),
 
-    path("deploy/", deploy),
+    path("deploy/github/", deploy_github),
     path("deploy/status/", deploy_status),
+    path("deploy/releases/", deploy_releases),
     path("deploy/logs/", deploy_logs),
-    path("deploy/rollback/", rollback),
-    path("deploy/<str:tenant>/", deploy_tenant),
+    path("deploy/rollback/", deploy_rollback),
     
 
     path("django_saas/", include(routerdjango_saas.urls)),
