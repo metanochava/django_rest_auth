@@ -1,5 +1,6 @@
 # =========================
 # Makefile - MyTech / Django SaaS
+# pip install bump2version
 # =========================
 
 SHELL := /bin/bash
@@ -74,6 +75,7 @@ gitrmc:
 .PHONY: push
 
 push: clean_pycache
+	bump2version patch
 	git add .
 	VERSION="$$( $(call GET_VERSION) )"
 	read -p "Mensagem do commit (release: v$$VERSION - ...): " m
@@ -86,6 +88,7 @@ push: clean_pycache
 .PHONY: pushpip
 
 pushpip: push
+	bump2version patch
 	$(PY) -m build
 	twine upload dist/*
 
@@ -99,6 +102,7 @@ pushpip: push
 .PHONY: upv
 
 upv: clean_pycache
+	bump2version patch
 	git add .
 	VERSION="$$( $(call GET_VERSION) )"
 	read -p "Mensagem do release v$$VERSION: " m
@@ -120,35 +124,35 @@ install:
 # =========================
 # GitFlow (novo)
 # =========================
-.PHONY: gf_init gf_feature_start gf_feature_finish gf_release_start gf_release_finish gf_hotfix_start gf_hotfix_finish
+.PHONY: init feature_start feature_finish release_start release_finish hotfix_start hotfix_finish
 
-gf_init:
+init:
 	git flow init -d
 
-gf_feature_start:
+feature_start:
 	read -p "Nome da feature (ex: login-api): " n; \
 	git flow feature start "$$n"
 
-gf_feature_finish:
+feature_finish:
 	read -p "Nome da feature (ex: login-api): " n; \
 	git flow feature finish "$$n"
 
-gf_release_start:
+release_start:
 	VERSION="$$( $(call GET_VERSION) )"; \
 	echo "Iniciando release v$$VERSION"; \
 	git flow release start "v$$VERSION"
 
-gf_release_finish:
+release_finish:
 	VERSION="$$( $(call GET_VERSION) )"; \
 	read -p "Mensagem do release v$$VERSION: " m; \
 	git flow release finish -m "release: v$$VERSION - $$m" "v$$VERSION"; \
 	git push origin main develop --tags
 
-gf_hotfix_start:
+hotfix_start:
 	read -p "Nome do hotfix (ex: fix-login): " n; \
 	git flow hotfix start "$$n"
 
-gf_hotfix_finish:
+hotfix_finish:
 	read -p "Nome do hotfix (ex: fix-login): " n; \
 	git flow hotfix finish "$$n"; \
 	git push origin main develop --tags
