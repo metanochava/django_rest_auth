@@ -80,7 +80,7 @@ push: clean_pycache
 	VERSION="$$( $(call GET_VERSION) )"
 	read -p "Mensagem do commit (release: v$$VERSION - ...): " m
 	git commit -m "release: v$$VERSION - $$m" || true
-	git push
+	git push --set-upstream origin develop
 
 # =========================
 # Build + Upload pip (sem tag)
@@ -108,7 +108,7 @@ upv: clean_pycache
 	read -p "Mensagem do release v$$VERSION: " m
 	git commit -m "release: v$$VERSION - $$m" || true
 	git tag "v$$VERSION"
-	git push
+	git push --set-upstream origin main develop
 	git push origin "v$$VERSION"
 	$(PY) -m build
 	twine upload dist/*
