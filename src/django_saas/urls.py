@@ -59,6 +59,12 @@ from django_saas.management.apicommands.view.modulo_schema import ModuloSchemaAP
 
 from django_saas.data.pdf.views.invoice import invoice_pdf
 
+from django_saas.view import home
+from django_saas.view import deploy, deploy_tenant, rollback, deploy_logs, deploy_status
+
+
+router, extra_patterns = build_saas_urls()
+
 
 # ─────────────────────────────
 # Router
@@ -83,6 +89,16 @@ routerdjango_saas.register("scaffolds", ScaffoldAPIView, basename="scaffolds")
 
 
 urlpatterns = [
+
+    path('', home, name='home'),
+
+    path("deploy/", deploy),
+    path("deploy/status/", deploy_status),
+    path("deploy/logs/", deploy_logs),
+    path("deploy/rollback/", rollback),
+    path("deploy/<str:tenant>/", deploy_tenant),
+    
+
     path("django_saas/", include(routerdjango_saas.urls)),
     path("auth/", include(routerauth.urls)),
     path("django_saas/relations/", RelationsAPIView.as_view()),
@@ -106,6 +122,7 @@ urlpatterns = [
 
     path("mail/", MailAPIView.as_view(), name="mail"),
     path("pdf/invoice/<int:invoice_id>/", invoice_pdf, name="invoice_pdf"),
+
 ]
 
 
