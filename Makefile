@@ -52,7 +52,7 @@ supersaas:
 	@$(MANAGE) supersaas
 
 run:
-	@$(MANAGE) runserver 84.247.162.222:12121
+	@$(MANAGE) runserver 84.247.162.222:7001
 
 # =========================
 # Git - utilitários
