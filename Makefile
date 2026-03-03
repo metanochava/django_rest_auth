@@ -1,6 +1,5 @@
 # =========================
-# Makefile - MyTech / Django SaaS
-# pip install bump2version
+# Makefile - Django SaaS Pro
 # =========================
 
 SHELL := /bin/bash
@@ -9,10 +8,11 @@ SHELL := /bin/bash
 
 PY := python3
 MANAGE := $(PY) src/manage.py
-VENV_ACTIVATE := source venv/bin/activate
 PYPROJECT := pyproject.toml
 
-# Lê a versão do pyproject.toml (PEP621: [project].version)
+# =========================
+# Lê versão do pyproject.toml
+# =========================
 define GET_VERSION
 $(PY) -c "import tomli; print(tomli.load(open('$(PYPROJECT)','rb'))['project']['version'])"
 endef
@@ -20,16 +20,16 @@ endef
 # =========================
 # Helpers
 # =========================
-.PHONY: clean_pycache version env
+.PHONY: clean version status
 
-clean_pycache:
+clean:
 	find . -name "__pycache__" -type d -exec rm -rf {} +
 
 version:
 	@$(call GET_VERSION)
 
-env:
-	@$(VENV_ACTIVATE); echo "✅ venv ativado"
+status:
+	git status -sb
 
 # =========================
 # Django
@@ -37,128 +37,108 @@ env:
 .PHONY: check migrations migrate superuser supersaas run
 
 check:
-	@$(MANAGE) check
+	$(MANAGE) check
 
 migrations:
-	@$(MANAGE) makemigrations
+	$(MANAGE) makemigrations
 
 migrate:
-	@$(MANAGE) migrate
+	$(MANAGE) migrate
 
 superuser:
-	@$(MANAGE) createsuperuser
+	$(MANAGE) createsuperuser
 
 supersaas:
-	@$(MANAGE) supersaas
+	$(MANAGE) supersaas
 
 run:
-	@$(MANAGE) runserver 84.247.162.222:7001
+	$(MANAGE) runserver 0.0.0.0:7001
 
 # =========================
-# Git - utilitários
+# Git básico
 # =========================
-.PHONY: gitback gitrmc gitignoreon gitignoreoff status
+.PHONY: push pull
 
-status:
-	git status -sb
+pull:
+	git pull
 
-gitback:
-	git reset --soft HEAD~1
-
-gitrmc:
-	read -p "Digite o caminho do ficheiro ou pasta: " m; \
-	git rm --cached "$$m"
+push:
+	git push origin main develop
 
 # =========================
-# Push (sem tag)
+# Bump Version (sem tag)
 # =========================
-.PHONY: push
+.PHONY: bump_patch bump_minor bump_major
 
-push: clean_pycache
-	bump2version patch
-	git add .
-	VERSION="$$( $(call GET_VERSION) )"; \
-	read -p "Mensagem do commit (release: v$$VERSION - ...): " m; \
-	git commit -m "release: v$$VERSION - $$m" || true; \
-	git push --set-upstream origin main develop;
+bump_patch:
+	bump2version patch --no-commit --no-tag
+	@echo "Nova versão: $(shell $(call GET_VERSION))"
 
-push: clean_pycache
-	git add .
-	VERSION="$$( $(call GET_VERSION) )"; \
-	read -p "Mensagem do commit (release: v$$VERSION - ...): " m; \
-	git commit -m "release: v$$VERSION - $$m" || true; \
-	git push --set-upstream origin main;
+bump_minor:
+	bump2version minor --no-commit --no-tag
+	@echo "Nova versão: $(shell $(call GET_VERSION))"
+
+bump_major:
+	bump2version major --no-commit --no-tag
+	@echo "Nova versão: $(shell $(call GET_VERSION))"
 
 # =========================
-# Build + Upload pip (sem tag)
+# Build + Upload PyPI
 # =========================
-.PHONY: pushpip
+.PHONY: build upload
 
-pushpip: push
-	$(PY) -m build; \
-	twine upload dist/*;
+build:
+	$(PY) -m build
 
-# =========================
-# Release por TAG (recomendado p/ deploy automático)
-# - Commit
-# - Tag vX.Y.Z
-# - Push branch + tag
-# - Build + Upload pip
-# =========================
-.PHONY: upv
-
-upv: clean_pycache
-	bump2version patch; \
-	git add .; \
-	VERSION="$$( $(call GET_VERSION) )"; \
-	read -p "Mensagem do release v$$VERSION: " m; \
-	git commit -m "release: v$$VERSION - $$m" || true; \
-	git tag "v$$VERSION"; \
-	git push --set-upstream origin main develop; \
-	git push origin "v$$VERSION"; \
-	$(PY) -m build; \
-	twine upload dist/*;
+upload:
+	twine upload dist/*
 
 # =========================
-# Install local editable
+# GitFlow
 # =========================
-.PHONY: install
+.PHONY: flow_init feature_start feature_finish release_start release_finish hotfix_start hotfix_finish
 
-install:
-	pip install -e .
-
-# =========================
-# GitFlow (novo)
-# =========================
-.PHONY: init feature_start feature_finish release_start release_finish hotfix_start hotfix_finish
-
-init:
+flow_init:
 	git flow init -d
 
 feature_start:
-	read -p "Nome da feature (ex: login-api): " n; \
+	read -p "Nome da feature: " n; \
+	git checkout develop; \
 	git flow feature start "$$n"
 
 feature_finish:
-	read -p "Nome da feature (ex: login-api): " n; \
-	git flow feature finish "$$n"
+	read -p "Nome da feature: " n; \
+	git flow feature finish "$$n"; \
+	git push origin develop
 
+# =========================
+# RELEASE PROFISSIONAL
+# =========================
 release_start:
+	git checkout develop
+	git pull
+	read -p "Bump (patch/minor/major): " b; \
+	bump2version $$b --no-commit --no-tag; \
 	VERSION="$$( $(call GET_VERSION) )"; \
-	echo "Iniciando release v$$VERSION"; \
-	git flow release start "v$$VERSION"
+	git add pyproject.toml; \
+	git commit -m "bump version $$VERSION"; \
+	git flow release start "$$VERSION"
 
 release_finish:
 	VERSION="$$( $(call GET_VERSION) )"; \
 	read -p "Mensagem do release v$$VERSION: " m; \
-	git flow release finish -m "release: v$$VERSION - $$m" "v$$VERSION"; \
+	git flow release finish -m "release: v$$VERSION - $$m" "$$VERSION"; \
 	git push origin main develop --tags
 
+# =========================
+# HOTFIX
+# =========================
 hotfix_start:
-	read -p "Nome do hotfix (ex: fix-login): " n; \
+	read -p "Nome do hotfix: " n; \
+	git checkout main; \
 	git flow hotfix start "$$n"
 
 hotfix_finish:
-	read -p "Nome do hotfix (ex: fix-login): " n; \
+	read -p "Nome do hotfix: " n; \
 	git flow hotfix finish "$$n"; \
 	git push origin main develop --tags
