@@ -77,10 +77,17 @@ gitrmc:
 push: clean_pycache
 	bump2version patch
 	git add .
-	VERSION="$$( $(call GET_VERSION) )"
-	read -p "Mensagem do commit (release: v$$VERSION - ...): " m
-	git commit -m "release: v$$VERSION - $$m" || true
-	git push --set-upstream origin develop
+	VERSION="$$( $(call GET_VERSION) )"; \
+	read -p "Mensagem do commit (release: v$$VERSION - ...): " m; \
+	git commit -m "release: v$$VERSION - $$m" || true; \
+	git push --set-upstream origin main develop;
+
+push: clean_pycache
+	git add .
+	VERSION="$$( $(call GET_VERSION) )"; \
+	read -p "Mensagem do commit (release: v$$VERSION - ...): " m; \
+	git commit -m "release: v$$VERSION - $$m" || true; \
+	git push --set-upstream origin main;
 
 # =========================
 # Build + Upload pip (sem tag)
@@ -88,9 +95,8 @@ push: clean_pycache
 .PHONY: pushpip
 
 pushpip: push
-	bump2version patch
-	$(PY) -m build
-	twine upload dist/*
+	$(PY) -m build; \
+	twine upload dist/*;
 
 # =========================
 # Release por TAG (recomendado p/ deploy automático)
@@ -102,16 +108,16 @@ pushpip: push
 .PHONY: upv
 
 upv: clean_pycache
-	bump2version patch
-	git add .
-	VERSION="$$( $(call GET_VERSION) )"
-	read -p "Mensagem do release v$$VERSION: " m
-	git commit -m "release: v$$VERSION - $$m" || true
-	git tag "v$$VERSION"
-	git push --set-upstream origin main develop
-	git push origin "v$$VERSION"
-	$(PY) -m build
-	twine upload dist/*
+	bump2version patch; \
+	git add .; \
+	VERSION="$$( $(call GET_VERSION) )"; \
+	read -p "Mensagem do release v$$VERSION: " m; \
+	git commit -m "release: v$$VERSION - $$m" || true; \
+	git tag "v$$VERSION"; \
+	git push --set-upstream origin main develop; \
+	git push origin "v$$VERSION"; \
+	$(PY) -m build; \
+	twine upload dist/*;
 
 # =========================
 # Install local editable
