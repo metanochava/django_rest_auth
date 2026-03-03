@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "django_saas"
-version = "1.1.5"
+version = "1.1.6"
 description = "Django SAAS Framework"
 readme = "README.md"
 license = { file = "LICENSE" }
@@ -26,9 +26,13 @@ dependencies = [
   "black",
   "questionary==2.1.1",
   "rich",
+  "gunicorn",
   "weasyprint",
   "django-money",
   "python-dotenv",
+  "django-cors-headers",
+  "psycopg[binary]",
+  "django-filter",
 ]
 
 [project.urls]
