@@ -121,7 +121,7 @@ release_start:
 	bump2version $$b --no-commit --no-tag; \
 	VERSION="$$( $(call GET_VERSION) )"; \
 	git add pyproject.toml; \
-	git commit -m "chore: bump version $$VERSION"; \
+	git commit -m "bump version $$VERSION"; \
 	git flow release start "$$VERSION"
 
 release_finish:
