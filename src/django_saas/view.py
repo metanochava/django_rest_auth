@@ -216,7 +216,7 @@ trap "rm -f $LOCK" EXIT
 touch "$LOCK"
 
 TS=$(date +%Y%m%d%H%M%S)
-NEW_RELEASE="$RELEASES/${TAG}-${TS}"
+NEW_RELEASE="$RELEASES/${{TAG}}-${{TS}}"
 
 mkdir -p "$RELEASES" "$SHARED"
 echo "🚀 Deploy TAG=$TAG -> $NEW_RELEASE" | tee -a "$LOG"
