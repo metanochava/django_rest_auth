@@ -61,8 +61,10 @@ from django_saas.data.pdf.views.invoice import invoice_pdf
 
 from django_saas.view import home
 from django_saas.view import deploy_github, deploy_status, deploy_releases, deploy_logs, deploy_rollback
+from django_saas.core.utils.autoload_urls import build_saas_urls
 
 router, extra_patterns = build_saas_urls()
+
 
 
 # ─────────────────────────────
