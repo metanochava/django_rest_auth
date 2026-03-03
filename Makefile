@@ -82,6 +82,13 @@ push: clean_pycache
 	git commit -m "release: v$$VERSION - $$m" || true; \
 	git push --set-upstream origin main develop;
 
+push: clean_pycache
+	git add .
+	VERSION="$$( $(call GET_VERSION) )"; \
+	read -p "Mensagem do commit (release: v$$VERSION - ...): " m; \
+	git commit -m "release: v$$VERSION - $$m" || true; \
+	git push --set-upstream origin main;
+
 # =========================
 # Build + Upload pip (sem tag)
 # =========================
