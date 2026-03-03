@@ -4,11 +4,12 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "django_saas"
-version = "1.1.7"
+version = "1.1.8"
 description = "Django SAAS Framework"
 readme = "README.md"
 license = { file = "LICENSE" }
 requires-python = ">=3.9"
+
 authors = [
   { name = "Dias Metano Salvador Chavana", email = "metanochava@gmail.com" }
 ]
@@ -36,10 +37,12 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/metanochava/ds"
-Repository = "https://github.com/metanochava/ds"
+Homepage = "https://github.com/metanochava/django_saas"
+Repository = "https://github.com/metanochava/django_saas"
+
+# 🔥 MUITO IMPORTANTE
+[tool.setuptools]
+package-dir = {"" = "src"}
 
 [tool.setuptools.packages.find]
 where = ["src"]
-
-
