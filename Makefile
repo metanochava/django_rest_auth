@@ -120,7 +120,7 @@ release_start:
 	read -p "Bump (patch/minor/major): " b; \
 	bump2version $$b --no-commit --no-tag; \
 	VERSION="$$( $(call GET_VERSION) )"; \
-	git add pyproject.toml; \
+	git add .; \
 	git commit -m "bump version $$VERSION"; \
 	git flow release start "$$VERSION"
 
